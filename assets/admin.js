@@ -8,7 +8,6 @@ jQuery(document).ready(function ($) {
         : [];
 
     renderForm();
-
     addStepBtn.on('click', function () {
         const newStep = {
             name: 'New Step',
@@ -19,7 +18,6 @@ jQuery(document).ready(function ($) {
         renderForm();
         saveForm();
     });
-
     // Render Form Steps and Inputs
     function renderForm() {
         formBuilder.html('');
@@ -28,8 +26,8 @@ jQuery(document).ready(function ($) {
             const stepDiv = $(`
                 <div class="step" data-step-index="${stepIndex}">
                     <div class="step-header">
+                        <button type="button" class="delete-step-btn button button-danger">X</button>
                         <h3 contenteditable="true" class="step-title">${step.name}</h3>
-                        <button type="button" class="delete-step-btn button button-danger">Delete Step</button>
                     </div>
                     <select class="step-condition">
                         <option value="">No Condition</option>
@@ -89,35 +87,54 @@ jQuery(document).ready(function ($) {
                         <select class="input-type">
                             <option value="text" ${input.type === 'text' ? 'selected' : ''}>Text</option>
                             <option value="email" ${input.type === 'email' ? 'selected' : ''}>Email</option>
-                            <option value="checkbox" ${input.type === 'checkbox' ? 'selected' : ''}>Checkbox</option>
+                            <option value="textarea" ${input.type === 'textarea' ? 'selected' : ''}>Text Area</option>
+                            <option value="national_code" ${input.type === 'national_code' ? 'selected' : ''}>National Code</option>
+                            <option value="post_code" ${input.type === 'post_code' ? 'selected' : ''}>Post Code</option>
+                            <option value="mobile" ${input.type === 'mobile' ? 'selected' : ''}>Mobile Number</option>
+                            <option value="telephone" ${input.type === 'telephone' ? 'selected' : ''}>Telephone</option>
                         </select>
-                        <input type="checkbox" ${input.required ? 'checked' : ''} /> Required
+                        <!-- Placeholder Field -->
+                        <input type="text" class="placeholder-input" placeholder="Placeholder text" value="${input.placeholder || ''}" />    
+                        <input type="checkbox" class="required-checkbox" ${input.required ? 'checked' : ''} /> Required
                         <button type="button" class="delete-input-btn button button-small button-danger">X</button>
                     </div>
                 </div>
             `);
-
+            // Apply .is_required class dynamically
+            if (input.required) {
+                inputDiv.addClass('is_required');
+            }
+            // Update label and type in formData on input
             inputDiv.find('label').on('input', function () {
                 formData[stepIndex].inputs[inputIndex].label = $(this).text();
                 saveForm();
             });
-
+    
             inputDiv.find('.input-type').on('change', function () {
                 formData[stepIndex].inputs[inputIndex].type = $(this).val();
                 saveForm();
             });
-
-            inputDiv.find('.delete-input-btn').on('click', function () {
-                if (confirm('Delete this input?')) {
-                    formData[stepIndex].inputs.splice(inputIndex, 1);
-                    renderForm();
-                    saveForm();
-                }
+            // Update placeholder
+            inputDiv.find('.placeholder-input').on('input', function () {
+                formData[stepIndex].inputs[inputIndex].placeholder = $(this).val();
+                saveForm();
             });
-
+            // Handle required checkbox
+            inputDiv.find('.required-checkbox').on('change', function () {
+                const isChecked = $(this).is(':checked');
+                formData[stepIndex].inputs[inputIndex].required = isChecked;
+                if (isChecked) {
+                    inputDiv.addClass('is_required');
+                } else {
+                    inputDiv.removeClass('is_required');
+                }
+                saveForm();
+            });
+    
             container.append(inputDiv);
         });
     }
+
 
     // Make Steps and Inputs Sortable
     function makeSortable() {

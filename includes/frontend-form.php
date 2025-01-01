@@ -18,16 +18,37 @@ function sproduct_display_form_on_single($content) {
                     <div class="sproduct-step" data-step="<?php echo $step_index; ?>" <?php echo $step_index !== 0 ? 'style="display:none;"' : ''; ?>>
                         <h3><?php echo esc_html($step['name']); ?></h3>
                         <?php foreach ($step['inputs'] as $input_index => $input) : ?>
-                            <div class="sproduct-input">
+                            
+                            <div class="sproduct-input <?php echo $input['required'] ? 'is_required' : ''; ?>">
                                 <label><?php echo esc_html($input['label']); ?></label>
-                                <?php if ($input['type'] === 'text' || $input['type'] === 'email') : ?>
-                                    <input type="<?php echo esc_attr($input['type']); ?>" 
-                                           name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
-                                           required="<?php echo $input['required'] ? 'required' : ''; ?>" />
-                                <?php elseif ($input['type'] === 'checkbox') : ?>
-                                    <input type="checkbox" 
-                                           name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
-                                           value="1" />
+
+                                <?php if ($input['type'] === 'text') : ?>
+                                    <input type="text" 
+                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
+                                        placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
+
+                                <?php elseif ($input['type'] === 'national_code' || $input['type'] === 'post_code') : ?>
+                                    <input type="number" 
+                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
+                                        placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
+
+                                <?php elseif ($input['type'] === 'mobile') : ?>
+                                    <input type="tel" 
+                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
+                                        placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
+
+                                <?php elseif ($input['type'] === 'telephone') : ?>
+                                    <input type="text" 
+                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
+                                        placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
+
+                                <?php elseif ($input['type'] === 'textarea') : ?>
+                                    <textarea name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" required="<?php echo $input['required'] ? 'required' : ''; ?>" placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>"></textarea>
+
+                                <?php elseif ($input['type'] === 'email') : ?>
+                                    <input type="email" 
+                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
+                                        placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
                                 <?php endif; ?>
                             </div>
                         <?php endforeach; ?>

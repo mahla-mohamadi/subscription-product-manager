@@ -22,7 +22,7 @@ function sproduct_form_builder_callback($post) {
         <div class="form-steps">
             <!-- Steps will be added here dynamically -->
         </div>
-        <button type="button" id="add-step-btn" class="button button-primary">+ Add Step</button>
+        <button type="button" id="add-step-btn" class="button button-primary">+</button>
     </div>
 
     <!-- Hidden Field to Store Form Data -->
