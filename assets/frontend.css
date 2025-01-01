@@ -1,0 +1,19 @@
+.sproduct-step {
+    margin-bottom: 20px;
+}
+
+.sproduct-navigation {
+    margin-top: 20px;
+}
+
+button {
+    margin-right: 10px;
+}
+
+button:disabled {
+    display: none !important;
+}
+input.invalid {
+    border: 2px solid red;
+    background-color: #ffe6e6;
+}
