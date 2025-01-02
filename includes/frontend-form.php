@@ -28,7 +28,7 @@ function sproduct_display_form_on_single($content) {
                                         placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
 
                                 <?php elseif ($input['type'] === 'national_code' || $input['type'] === 'post_code') : ?>
-                                    <input type="number" 
+                                    <input type="nationalcode" 
                                         name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
                                         placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
 
@@ -38,7 +38,7 @@ function sproduct_display_form_on_single($content) {
                                         placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
 
                                 <?php elseif ($input['type'] === 'telephone') : ?>
-                                    <input type="text" 
+                                    <input type="telephone" 
                                         name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
                                         placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
 

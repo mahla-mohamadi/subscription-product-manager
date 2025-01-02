@@ -33,6 +33,35 @@ jQuery(document).ready(function ($) {
             e.preventDefault();  // Block submission if validation fails
         }
     });
+    $('.sproduct-input input[type="telephone"]').on('input', function () {
+        const input = $(this);
+        const value = input.val().trim();
+        clearError(input);
+    
+        // 1. Allow only numbers
+        if (!/^\d*$/.test(value)) {
+            showError(input, 'You must enter only numbers.');
+            input.val(value.replace(/\D/g, ''));  // Remove non-digit characters
+        }
+    
+        // 2. Enforce exactly 8 digits
+        if (value.length > 8) {
+            showError(input, 'The phone number is wrong.');
+            input.val(value.substring(0, 8));  // Limit to 8 digits
+        }
+    });
+    $('.sproduct-input input[type="telephone"]').on('keypress', function (e) {
+        const charCode = e.which ? e.which : e.keyCode;
+        if (charCode < 48 || charCode > 57) {
+            e.preventDefault();
+            showError($(this), 'You must enter only numbers.');
+        }
+        // Prevent typing if already 8 digits
+        if ($(this).val().length >= 8) {
+            e.preventDefault();
+            showError($(this), 'The phone number cannot exceed 8 digits.');
+        }
+    });
     function validateStep(stepIndex) {
         let isValid = true;
 
@@ -46,7 +75,97 @@ jQuery(document).ready(function ($) {
                 clearError($(this));
             }
         });
+        // Phone Number Validation (inside validateStep)
+        steps.eq(stepIndex).find('input[type="tel"]').each(function () {
+            const value = $(this).val().trim();
+            const pattern = /^09[0-9]{9}$/;
+            const isRequired = $(this).closest('.is_required').length > 0;
 
+            // Required validation
+            if (isRequired && value === '') {
+                showError($(this), 'پر کردن این فیلد اجباری است');
+                isValid = false;
+            } 
+            // Format validation only if field is not empty
+            else if (value !== '' && !pattern.test(value)) {
+                showError($(this), 'شماره موبایل باید با 09 شروع شود و 11 رقم باشد.');
+                isValid = false;
+            } else {
+                clearError($(this));
+            }
+        });
+        // Email Validation (Latin and required @ and .)
+        steps.eq(stepIndex).find('input[type="email"]').each(function () {
+            const value = $(this).val().trim();
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const isRequired = $(this).closest('.is_required').length > 0;
+            const farsiPattern = /[آ-ی]/;  // Detects Farsi characters
+
+            // Check for required email
+            if (isRequired && value === '') {
+                showError($(this), 'پر کردن این فیلد اجباری است');
+                isValid = false;
+            } 
+            // Farsi character check
+            else if (farsiPattern.test(value)) {
+                showError($(this), 'Enter your email in Latin');
+                isValid = false;
+            } 
+            // Check for @ and . in email
+            else if (isRequired && !value.includes('@') || isRequired && !value.includes('.')) {
+                showError($(this), 'The email must contain "@" and "."');
+                isValid = false;
+            } 
+            // Final format check
+            else if (value !== '' && !emailPattern.test(value)) {
+                showError($(this), 'ایمیل وارد شده معتبر نیست.');
+                isValid = false;
+            } else {
+                clearError($(this));
+            }
+        });
+        // Landline (Telephone) Validation
+        steps.eq(stepIndex).find('input[type="telephone"]').each(function () {
+            const value = $(this).val().trim();
+            const pattern = /^[0-9]{8}$/;
+            const isRequired = $(this).closest('.is_required').length > 0;
+
+
+            if (isRequired && value === '') {
+                showError($(this), 'پر کردن این فیلد اجباری است');
+                isValid = false;
+            }
+            // Check if required and empty
+            else if ($(this).closest('.is_required').length && value === '') {
+                showError($(this), 'پر کردن این فیلد اجباری است');
+                isValid = false;
+            } 
+            // Check format (exactly 8 digits)
+            else if (value !== '' && !pattern.test(value)) {
+                showError($(this), 'The phone number is wrong.');
+                isValid = false;
+            } else {
+                clearError($(this));
+            }
+        });
+        // Postal Code (National Code) Validation
+        steps.eq(stepIndex).find('input[type="nationalcode"]').each(function () {
+            const value = $(this).val().trim();
+            const isRequired = $(this).closest('.is_required').length > 0;
+
+            // 1. Check if required and empty
+            if (isRequired && value === '') {
+                showError($(this), 'پر کردن این فیلد اجباری است');
+                isValid = false;
+            } 
+            // 2. Validate length (exactly 10 digits)
+            else if (value !== '' && value.length !== 10) {
+                showError($(this), 'The entered postal code is wrong.');
+                isValid = false;
+            } else {
+                clearError($(this));
+            }
+        });
         return isValid;
     }
     prevBtn.on('click', function () {
@@ -86,18 +205,37 @@ jQuery(document).ready(function ($) {
         // 1. Validate if it starts with 09
         if (!value.startsWith('09')) {
             showError(input, 'شماره موبایل باید با 09 شروع شود');
-            return;
-        }
-
-        // 2. Validate if it contains non-digit characters
-        if (!/^\d*$/.test(value)) {
+        } else if (!/^\d*$/.test(value)) {
             showError(input, 'لطفا فقط عدد وارد کنید');
-            return;
-        }
-
-        // 3. Validate length (exactly 11 digits)
-        if (value.length > 0 && value.length !== 11) {
+        } else if (value.length > 0 && value.length !== 11) {
             showError(input, 'شماره موبایل باید دقیقا 11 رقم باشد');
+        }
+    });
+    // Email Real-time Validation (Prevent Farsi and Enforce Latin)
+    $('.sproduct-input input[type="email"]').on('input', function () {
+        const input = $(this);
+        const value = input.val().trim();
+        
+        clearError(input);
+        
+        // 1. Prevent Farsi characters
+        const farsiPattern = /[آ-ی]/;  // Matches any Farsi character
+        if (farsiPattern.test(value)) {
+            showError(input, 'Enter your email in Latin');
+            input.val(value.replace(farsiPattern, ''));  // Remove Farsi characters
+        }
+    });
+    // Real-time Validation for Postal Code (Prevent Letters)
+    $('.sproduct-input input[type="nationalcode"]').on('input', function () {
+        const input = $(this);
+        const value = input.val().trim();
+        
+        clearError(input);
+        
+        // 1. Allow only numbers (remove letters)
+        if (!/^\d*$/.test(value)) {
+            showError(input, 'Zip code must be entered as a number');
+            input.val(value.replace(/\D/g, ''));  // Remove non-digits
         }
     });
     form.on('submit', function (e) {
@@ -115,7 +253,7 @@ jQuery(document).ready(function ($) {
             }
         });
 
-        $('.sproduct-input input[name*="national_code"]').each(function () {
+        $('.sproduct-input input[type="nationalcode"]').each(function () {
             const pattern = /^[0-9]{10}$/;
             const inputValue = $(this).val().trim();
     
@@ -151,7 +289,7 @@ jQuery(document).ready(function ($) {
             }
         });
 
-        $('.sproduct-input input[name*="telephone"]').each(function () {
+        $('.sproduct-input input[type="telephone"]').each(function () {
             const pattern = /^[0-9]{8}$/;
             const inputValue = $(this).val().trim();
     
@@ -219,6 +357,14 @@ jQuery(document).ready(function ($) {
         if (charCode < 48 || charCode > 57) {
             e.preventDefault();
             showError($(this), 'لطفا فقط عدد وارد کنید');
+        }
+    });
+    // Prevent Non-numeric Characters from Being Typed
+    $('.sproduct-input input[type="nationalcode"]').on('keypress', function (e) {
+        const charCode = e.which ? e.which : e.keyCode;
+        if (charCode < 48 || charCode > 57) {
+            e.preventDefault();
+            showError($(this), 'Zip code must be entered as a number');
         }
     });
     $('.sproduct-input input, .sproduct-input textarea').on('input', function () {
