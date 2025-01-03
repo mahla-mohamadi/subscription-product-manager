@@ -17,6 +17,7 @@ define('SPRODUCT_URL', plugin_dir_url(__FILE__));
 // Require Core Plugin Files
 require_once SPRODUCT_PATH . 'includes/cpt.php';              // Custom Post Type
 require_once SPRODUCT_PATH . 'includes/form-builder.php';     // Admin Form Builder
+require_once SPRODUCT_PATH . 'includes/admin.php';    
 require_once SPRODUCT_PATH . 'includes/frontend-form.php';    // Frontend Form Display
 require_once SPRODUCT_PATH . 'includes/ajax-handler.php';     // AJAX Handlers
 require_once SPRODUCT_PATH . 'includes/db.php';               // Database Operations (Optional)

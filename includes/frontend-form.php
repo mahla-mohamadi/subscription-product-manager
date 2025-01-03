@@ -4,12 +4,12 @@ function sproduct_display_form_on_single($content) {
     if (is_singular('sproduct') && in_the_loop() && is_main_query()) {
         global $post;
         $form_data = get_post_meta($post->ID, '_sproduct_form_data', true);
-
         if (!$form_data) {
             return $content . '<p>No form data found.</p>';
         }
-
         $form_data = json_decode($form_data, true);
+        $plans = get_post_meta($post->ID, '_sproduct_plans', true);
+        $plans = maybe_unserialize($plans);  // Ensure proper decoding
         ob_start();
         ?>
         <div id="sproduct-form-frontend" data-post-id="<?php echo esc_attr($post->ID); ?>">
@@ -52,6 +52,24 @@ function sproduct_display_form_on_single($content) {
                                 <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
+                        
+                        <!-- Display Plans Only in the Final Step -->
+                        <?php if ($step_index === count($form_data) - 1 && !empty($plans)) : ?>
+                            <div class="sproduct-plans">
+                                <h3>Select a Subscription Plan</h3>
+                                <?php foreach ($plans as $index => $plan) : ?>
+                                    <div class="plan-option">
+                                        <input type="radio" id="plan_<?php echo $index; ?>" name="selected_plan" value="<?php echo esc_attr($plan['name']); ?>" required>
+                                        <label for="plan_<?php echo $index; ?>">
+                                            <strong><?php echo esc_html($plan['name']); ?></strong> - 
+                                            <?php echo esc_html($plan['days']); ?> Days - 
+                                            $<?php echo esc_html($plan['price']); ?>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
                     </div>
                 <?php endforeach; ?>
                 <div class="sproduct-navigation">
@@ -83,3 +101,4 @@ function sproduct_enqueue_frontend_assets() {
     }
 }
 add_action('wp_enqueue_scripts', 'sproduct_enqueue_frontend_assets');
+

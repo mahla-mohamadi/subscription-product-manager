@@ -239,6 +239,12 @@ jQuery(document).ready(function ($) {
         }
     });
     form.on('submit', function (e) {
+        const selectedPlan = $('input[name="selected_plan"]:checked').val();
+        if (!selectedPlan) {
+            e.preventDefault();
+            alert('Please select a subscription plan before submitting.');
+            return;
+        }
         let isValid = true;
     
         $('.sproduct-input input[type="text"], .sproduct-input input[type="email"], textarea').each(function () {
@@ -317,7 +323,9 @@ jQuery(document).ready(function ($) {
             e.preventDefault();
             return;
         }
-    
+        // Collect form data
+        const formData = form.serialize();
+        const postID = $('#sproduct-form-frontend').data('post-id');
         saveStepData();
         $.ajax({
             url: sproductAjax.ajaxurl,
@@ -332,6 +340,7 @@ jQuery(document).ready(function ($) {
                 alert('فرم با موفقیت ارسال شد!');
                 sessionStorage.removeItem('sproductFormData');
                 sessionStorage.removeItem('currentStep');
+                form[0].reset();
             },
             error: function () {
                 alert('خطا در ارسال فرم.');
