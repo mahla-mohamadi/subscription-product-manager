@@ -77,6 +77,9 @@ jQuery(document).ready(function ($) {
         validations.forEach(({ selector, message, condition }) => {
             step.find(selector).each(function () {
                 const value = $(this).val().trim();
+                if(value==='' && selector!='.is_required input, .is_required textarea'){
+                    return;
+                }
                 if (condition(value)) {
                     showError($(this), message);
                     isValid = false;
@@ -121,8 +124,10 @@ jQuery(document).ready(function ($) {
     }
 
     function showError(input, message) {
-        clearError(input);
-        input.addClass('input-error-border').after(`<div class="input-error" style="color: red; margin-top: 5px;">${message}</div>`);
+        if(! input.siblings('.input-error').length){
+            clearError(input);
+            input.addClass('input-error-border').after(`<div class="input-error" style="color: red; margin-top: 5px;">${message}</div>`);
+        }
     }
 
     function clearError(input) {
