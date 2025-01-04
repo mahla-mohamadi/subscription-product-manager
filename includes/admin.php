@@ -1,5 +1,21 @@
 <?php
-// Add Custom Columns to sproduct Admin Table
+function create_hidden_virtual_product() {
+    if ( class_exists( 'WC_Product' ) ) {
+        if ( ! wc_get_product_id_by_sku( 's_prod_virtual' ) ) {
+            $product = new WC_Product();
+            $product->set_name( 'اشتراک' );
+            $product->set_status( 'publish' );
+            $product->set_catalog_visibility( 'hidden' );
+            $product->set_virtual( true );  // Set as virtual product
+            $product->set_price( 1 );
+            $product->set_regular_price( 1 );
+            $product->set_sku( 's_prod_virtual' );
+            $product->save();
+        }
+    }
+}
+add_action('admin_init', 'create_hidden_virtual_product');
+
 function sproduct_add_custom_columns($columns) {
     $columns['form_data'] = 'Form Data';
     return $columns;
@@ -144,4 +160,3 @@ function sproduct_save_plan_repeater($post_id) {
     }
 }
 add_action('save_post', 'sproduct_save_plan_repeater');
-
