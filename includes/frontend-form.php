@@ -13,7 +13,7 @@ function sproduct_display_form_on_single($content) {
         ob_start();
         ?>
         <div id="sproduct-form-frontend" data-post-id="<?php echo esc_attr($post->ID); ?>">
-            <form id="sproduct-main-form">
+            <form id="sproduct-main-form" method="POST">
                 <?php foreach ($form_data as $step_index => $step) : ?>
                     <div class="sproduct-step" data-step="<?php echo $step_index; ?>" <?php echo $step_index !== 0 ? 'style="display:none;"' : ''; ?>>
                         <h3><?php echo esc_html($step['name']); ?></h3>
@@ -102,3 +102,31 @@ function sproduct_enqueue_frontend_assets() {
 }
 add_action('wp_enqueue_scripts', 'sproduct_enqueue_frontend_assets');
 
+
+add_filter('woocommerce_checkout_fields', 'custom_remove_billing_city_for_specific_product');
+
+function custom_remove_billing_city_for_specific_product($fields) {
+    // Get the cart contents
+    $cart = WC()->cart->get_cart();
+    
+    // Initialize product check
+    $only_target_product = true;
+
+    foreach ($cart as $cart_item) {
+        $product = $cart_item['data'];
+        $sku = $product->get_sku();
+
+        // Check if the SKU matches the specific product
+        if ($sku !== 's_prod_virtual') {
+            $only_target_product = false;
+            break;
+        }
+    }
+
+    // If only the target product is in the cart, remove the billing city field
+    if ($only_target_product) {
+        unset($fields['billing']['billing_city']);
+    }
+
+    return $fields;
+}

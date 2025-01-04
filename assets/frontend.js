@@ -37,30 +37,37 @@ jQuery(document).ready(function ($) {
     });
 
     form.on('submit', function (e) {
-        if (!$('input[name="selected_plan"]:checked').val()) {
-            e.preventDefault();
-            alert('Please select a subscription plan before submitting.');
-        } else if (!validateAll()) {
-            e.preventDefault();
-        } else {
-            saveStepData();
+        e.preventDefault();
+        let submittedFormData = $(this).serialize();
+        console.log(submittedFormData);
+        // if (!$('input[name="selected_plan"]:checked').val()) {
+        //     e.preventDefault();
+        //     alert('Please select a subscription plan before submitting.');
+        // } else if (!validateAll()) {
+        //     e.preventDefault();
+        // } else {
+        //     saveStepData();
             $.ajax({
                 url: sproductAjax.ajaxurl,
                 method: 'POST',
+                dataType: 'json',
                 data: {
                     action: 'sproduct_submit_form',
-                    form_data: JSON.stringify(form.serialize()),
-                    post_id: form.closest('#sproduct-form-frontend').data('post-id'),
+                    submittedFormData: submittedFormData,
+                    // form_data: JSON.stringify(form.serialize()),
+                    // post_id: form.closest('#sproduct-form-frontend').data('post-id'),
                     nonce: sproductAjax.nonce
                 },
-                success: () => {
-                    alert('فرم با موفقیت ارسال شد!');
-                    sessionStorage.clear();
-                    form[0].reset();
+                success: (res) => {
+                    console.log(res);
                 },
-                error: () => alert('خطا در ارسال فرم.')
+                error: (xhr, status, error) => {
+                    console.log(xhr.responseText);  // Log the server response
+                    console.log(status, error);     // Log the status and error message
+                    alert('خطا در ارسال فرم.');
+                }
             });
-        }
+        // }
     });
 
     function validateStep(stepIndex) {
