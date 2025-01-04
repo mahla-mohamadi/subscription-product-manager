@@ -17,3 +17,12 @@ input.invalid {
     border: 2px solid red;
     background-color: #ffe6e6;
 }
+.checkbox-group {
+    margin-top: 10px;
+}
+.checkbox-group div {
+    margin-bottom: 8px;
+}
+.checkbox-group label {
+    cursor: pointer;
+}

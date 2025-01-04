@@ -4,23 +4,22 @@ jQuery(document).ready(function ($) {
         prevBtn = $('#prev-btn'),
         submitBtn = $('#submit-btn'),
         form = $('#sproduct-main-form');
-
     let currentStep = parseInt(sessionStorage.getItem('currentStep')) || 0,
         formData = JSON.parse(sessionStorage.getItem('sproductFormData')) || {};
-
     showStep(currentStep);
     populateForm();
-
     function populateForm() {
         $.each(formData, (name, value) => {
             const input = $(`[name="${name}"]`);
             if (input.length) {
-                input.val(value);
-                if (input.attr('type') === 'checkbox' && value === "1") input.prop('checked', true);
+                if (input.attr('type') === 'checkbox') {
+                    input.prop('checked', value === "1");
+                } else {
+                    input.val(value);
+                }
             }
         });
     }
-
     function handleNavigation(change) {
         if (validateStep(currentStep)) {
             currentStep += change;
@@ -28,7 +27,6 @@ jQuery(document).ready(function ($) {
             saveStepData();
         }
     }
-
     nextBtn.on('click', () => handleNavigation(1));
     prevBtn.on('click', () => handleNavigation(-1));
     
@@ -38,8 +36,8 @@ jQuery(document).ready(function ($) {
 
     form.on('submit', function (e) {
         if (!$('input[name="selected_plan"]:checked').val()) {
-            e.preventDefault();
             alert('Please select a subscription plan before submitting.');
+            e.preventDefault();
         } else if (!validateAll()) {
             e.preventDefault();
         } else {
@@ -49,7 +47,7 @@ jQuery(document).ready(function ($) {
                 method: 'POST',
                 data: {
                     action: 'sproduct_submit_form',
-                    form_data: JSON.stringify(form.serialize()),
+                    form_data: form.serialize(),  // Serialized but sent via POST (not URL)
                     post_id: form.closest('#sproduct-form-frontend').data('post-id'),
                     nonce: sproductAjax.nonce
                 },
@@ -58,40 +56,45 @@ jQuery(document).ready(function ($) {
                     sessionStorage.clear();
                     form[0].reset();
                 },
-                error: () => alert('خطا در ارسال فرم.')
+                error: () => {
+                    alert('خطا در ارسال فرم.');
+                    sessionStorage.clear();
+                }
             });
         }
     });
-
     function validateStep(stepIndex) {
         let isValid = true;
         const step = steps.eq(stepIndex);
         const validations = [
-            { selector: '.is_required input, .is_required textarea', message: 'پر کردن این فیلد اجباری است', condition: (v) => v === '' },
-            { selector: 'input[type="tel"]', message: 'شماره موبایل باید با 09 شروع شود و 11 رقم باشد.', condition: (v) => !/^09\d{9}$/.test(v) },
-            { selector: 'input[type="email"]', message: 'ایمیل وارد شده معتبر نیست.', condition: (v) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
-            { selector: 'input[type="telephone"]', message: 'The phone number is wrong.', condition: (v) => !/^\d{8}$/.test(v) },
-            { selector: 'input[type="nationalcode"]', message: 'کد ملی باید دقیقاً 10 رقم باشد.', condition: (v) => v.length !== 10 }
+            {selector: 'input[type="tel"], input[type="telephone"]', message: 'شماره موبایل باید با 09 شروع شود و 11 رقم باشد.', condition: (v) => !/^09\d{9}$/.test(v)},
+            {selector: 'input[type="email"]', message: 'ایمیل وارد شده معتبر نیست.', condition: (v) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+            {selector: 'input[type="nationalcode"]', message: 'کد ملی باید دقیقاً 10 رقم باشد.', condition: (v) => v.length !== 10}
         ];
-
-        validations.forEach(({ selector, message, condition }) => {
-            step.find(selector).each(function () {
-                const value = $(this).val().trim();
-                if(value==='' && selector!='.is_required input, .is_required textarea'){
-                    return;
+        step.find('input, textarea').each(function () {
+            const value = $(this).val().trim();
+            const isRequired = $(this).closest('.is_required').length > 0;
+            let fieldValid = true;
+            if (isRequired && value === '') {
+                showError($(this), 'پر کردن این فیلد اجباری است');
+                fieldValid = false;
+            } else {
+                clearError($(this));
+                if (value !== '') {
+                    validations.forEach(({ selector, message, condition }) => {
+                        if ($(this).is(selector) && condition(value)) {
+                            showError($(this), message);
+                            fieldValid = false;
+                        }
+                    });
                 }
-                if (condition(value)) {
-                    showError($(this), message);
-                    isValid = false;
-                } else {
-                    clearError($(this));
-                }
-            });
+            }
+            if (!fieldValid) {
+                isValid = false;
+            }
         });
-
         return isValid;
-    }
-
+    }    
     function validateAll() {
         let isValid = true;
         form.find('input, textarea').each(function () {
@@ -104,16 +107,21 @@ jQuery(document).ready(function ($) {
         });
         return isValid;
     }
-
     function showStep(stepIndex) {
         steps.hide().eq(stepIndex).show();
         prevBtn.prop('disabled', stepIndex === 0);
         nextBtn.toggle(stepIndex !== steps.length - 1);
         submitBtn.toggle(stepIndex === steps.length - 1);
     }
-
+    form.on('input change', 'input, textarea, select', function () {
+        const input = $(this);
+        formData[input.attr('name')] = input.attr('type') === 'checkbox'
+            ? input.is(':checked') ? "1" : "0"
+            : input.val();
+        sessionStorage.setItem('sproductFormData', JSON.stringify(formData));
+    });
     function saveStepData() {
-        steps.eq(currentStep).find('input').each(function () {
+        steps.eq(currentStep).find('input, textarea, select').each(function () {
             const input = $(this);
             formData[input.attr('name')] = input.attr('type') === 'checkbox'
                 ? input.is(':checked') ? "1" : "0"
@@ -124,10 +132,8 @@ jQuery(document).ready(function ($) {
     }
 
     function showError(input, message) {
-        if(! input.siblings('.input-error').length){
-            clearError(input);
-            input.addClass('input-error-border').after(`<div class="input-error" style="color: red; margin-top: 5px;">${message}</div>`);
-        }
+        clearError(input);
+        input.addClass('input-error-border').after(`<div class="input-error" style="color: red; margin-top: 5px;">${message}</div>`);
     }
 
     function clearError(input) {
@@ -153,7 +159,6 @@ jQuery(document).ready(function ($) {
             }
         });
     });
-
     form.on('keypress', 'input[type="tel"], input[type="nationalcode"]', function (e) {
         const charCode = e.which ? e.which : e.keyCode;
         if (charCode < 48 || charCode > 57) {

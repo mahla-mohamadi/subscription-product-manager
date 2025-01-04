@@ -13,7 +13,7 @@ function sproduct_display_form_on_single($content) {
         ob_start();
         ?>
         <div id="sproduct-form-frontend" data-post-id="<?php echo esc_attr($post->ID); ?>">
-            <form id="sproduct-main-form">
+            <form id="sproduct-main-form" method="POST">
                 <?php foreach ($form_data as $step_index => $step) : ?>
                     <div class="sproduct-step" data-step="<?php echo $step_index; ?>" <?php echo $step_index !== 0 ? 'style="display:none;"' : ''; ?>>
                         <h3><?php echo esc_html($step['name']); ?></h3>
@@ -21,6 +21,23 @@ function sproduct_display_form_on_single($content) {
                             
                             <div class="sproduct-input <?php echo $input['required'] ? 'is_required' : ''; ?>">
                                 <label><?php echo esc_html($input['label']); ?></label>
+
+                                <?php if ($input['type'] === 'checkbox_group') : ?>
+                                    <div class="checkbox-group">
+                                        <?php foreach ($input['options'] as $option_index => $option) : ?>
+                                            <div>
+                                                <label>
+                                                    <input type="checkbox" 
+                                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>[]" 
+                                                        value="<?php echo esc_attr($option); ?>">
+                                                    <span class="wcpa_checkbox_custom"></span>
+                                                    <?php echo esc_html($option); ?>
+                                                </label>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+
 
                                 <?php if ($input['type'] === 'text') : ?>
                                     <input type="text" 

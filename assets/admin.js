@@ -92,6 +92,7 @@ jQuery(document).ready(function ($) {
                             <option value="post_code" ${input.type === 'post_code' ? 'selected' : ''}>Post Code</option>
                             <option value="mobile" ${input.type === 'mobile' ? 'selected' : ''}>Mobile Number</option>
                             <option value="telephone" ${input.type === 'telephone' ? 'selected' : ''}>Telephone</option>
+                            <option value="checkbox_group" ${input.type === 'checkbox_group' ? 'selected' : ''}>Checkbox Group</option>
                         </select>
                         <!-- Placeholder Field -->
                         <input type="text" class="placeholder-input" placeholder="Placeholder text" value="${input.placeholder || ''}" />    
@@ -109,11 +110,42 @@ jQuery(document).ready(function ($) {
                 formData[stepIndex].inputs[inputIndex].label = $(this).text();
                 saveForm();
             });
-    
             inputDiv.find('.input-type').on('change', function () {
+                const newType = $(this).val();
                 formData[stepIndex].inputs[inputIndex].type = $(this).val();
+                // Remove any existing repeater to avoid duplicates
+                inputDiv.find('.checkbox-repeater').remove();
+
+                if (newType === 'checkbox_group') {
+                    const repeater = $('<div class="checkbox-repeater"></div>');
+
+                    const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
+                    repeater.append(addOptionBtn);
+
+                    addOptionBtn.on('click', function () {
+                        const newIndex = repeater.find('.checkbox-item').length + 1;
+                        const newOption = $(`
+                            <div class="checkbox-item">
+                                <input type="text" value="" class="checkbox-option" placeholder="Option ${newIndex}">
+                                <button type="button" class="delete-option">X</button>
+                            </div>
+                        `);
+                        repeater.append(newOption);
+                    });
+
+                    repeater.on('click', '.delete-option', function () {
+                        $(this).closest('.checkbox-item').remove();
+                    });
+
+                    // Append the repeater below the input
+                    inputDiv.append(repeater);
+                }
+
                 saveForm();
             });
+
+
+
             // Update placeholder
             inputDiv.find('.placeholder-input').on('input', function () {
                 formData[stepIndex].inputs[inputIndex].placeholder = $(this).val();
@@ -130,9 +162,47 @@ jQuery(document).ready(function ($) {
                 }
                 saveForm();
             });
-    
+            if (input.type === 'checkbox_group') {
+                const repeater = $('<div class="checkbox-repeater"></div>');
+                if (input.options) {
+                    // Restore saved options if available
+                    const options = input.options || [];
+                    options.forEach((option, index) => {
+                        const optionDiv = $(`
+                            <div class="checkbox-item">
+                                <input type="text" value="${option}" class="checkbox-option" placeholder="Option ${index + 1}">
+                                <button type="button" class="delete-option">X</button>
+                            </div>
+                        `);
+                        repeater.append(optionDiv);
+                    });
+                }
+                const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
+                repeater.append(addOptionBtn);
+            
+                addOptionBtn.on('click', function () {
+                    const newIndex = repeater.find('.checkbox-item').length + 1;
+                    const newOption = $(`
+                        <div class="checkbox-item">
+                            <input type="text" value="" class="checkbox-option" placeholder="Option ${newIndex}">
+                            <button type="button" class="delete-option">X</button>
+                        </div>
+                    `);
+                    repeater.append(newOption);
+                });
+            
+                repeater.on('click', '.delete-option', function () {
+                    $(this).closest('.checkbox-item').remove();
+                });
+            
+                inputDiv.append(repeater);
+            }
             container.append(inputDiv);
+
+
+            
         });
+        
     }
 
 
@@ -164,6 +234,20 @@ jQuery(document).ready(function ($) {
     }
 
     function saveForm() {
+        $('.step').each(function (stepIndex) {
+            $(this).find('.input-item').each(function (inputIndex) {
+                const inputType = $(this).find('.input-type').val();
+                formData[stepIndex].inputs[inputIndex].type = inputType;
+    
+                if (inputType === 'checkbox_group') {
+                    const options = [];
+                    $(this).find('.checkbox-option').each(function () {
+                        options.push($(this).val());
+                    });
+                    formData[stepIndex].inputs[inputIndex].options = options;
+                }
+            });
+        });
         hiddenInput.val(JSON.stringify(formData));
     }
 
