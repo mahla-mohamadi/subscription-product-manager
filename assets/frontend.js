@@ -37,7 +37,11 @@ jQuery(document).ready(function ($) {
     form.on('submit', function (e) {
         e.preventDefault();
         let submittedFormData = $(this).serialize();
-        console.log(submittedFormData);
+        let postID = $('#sproduct-form-frontend').attr('data-post-id');
+        let planPrice = $('input[name=selected_plan]:checked').attr('data-plan-price');
+        let planDuration = $('input[name=selected_plan]:checked').attr('data-plan-duration');
+        let planName = $('input[name=selected_plan]:checked').val();
+        let requestType = 'خرید سرویس جدید';
         // if (!$('input[name="selected_plan"]:checked').val()) {
         //     e.preventDefault();
         //     alert('Please select a subscription plan before submitting.');
@@ -52,6 +56,11 @@ jQuery(document).ready(function ($) {
                 data: {
                     action: 'sproduct_submit_form',
                     submittedFormData: submittedFormData,
+                    postID: postID,
+                    planName: planName,
+                    planPrice: planPrice,
+                    planDuration: planDuration,
+                    requestType: requestType,
                     // form_data: JSON.stringify(form.serialize()),
                     // post_id: form.closest('#sproduct-form-frontend').data('post-id'),
                     nonce: sproductAjax.nonce
@@ -117,23 +126,23 @@ jQuery(document).ready(function ($) {
         nextBtn.toggle(stepIndex !== steps.length - 1);
         submitBtn.toggle(stepIndex === steps.length - 1);
     }
-    form.on('input change', 'input, textarea, select', function () {
-        const input = $(this);
-        formData[input.attr('name')] = input.attr('type') === 'checkbox'
-            ? input.is(':checked') ? "1" : "0"
-            : input.val();
-        sessionStorage.setItem('sproductFormData', JSON.stringify(formData));
-    });
-    function saveStepData() {
-        steps.eq(currentStep).find('input, textarea, select').each(function () {
-            const input = $(this);
-            formData[input.attr('name')] = input.attr('type') === 'checkbox'
-                ? input.is(':checked') ? "1" : "0"
-                : input.val();
-        });
-        sessionStorage.setItem('sproductFormData', JSON.stringify(formData));
-        sessionStorage.setItem('currentStep', currentStep);
-    }
+    // form.on('input change', 'input, textarea, select', function () {
+    //     const input = $(this);
+    //     formData[input.attr('name')] = input.attr('type') === 'checkbox'
+    //         ? input.is(':checked') ? "1" : "0"
+    //         : input.val();
+    //     sessionStorage.setItem('sproductFormData', JSON.stringify(formData));
+    // });
+    // function saveStepData() {
+    //     steps.eq(currentStep).find('input, textarea, select').each(function () {
+    //         const input = $(this);
+    //         formData[input.attr('name')] = input.attr('type') === 'checkbox'
+    //             ? input.is(':checked') ? "1" : "0"
+    //             : input.val();
+    //     });
+    //     sessionStorage.setItem('sproductFormData', JSON.stringify(formData));
+    //     sessionStorage.setItem('currentStep', currentStep);
+    // }
 
     function showError(input, message) {
         clearError(input);

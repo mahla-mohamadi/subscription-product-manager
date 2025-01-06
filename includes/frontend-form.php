@@ -76,11 +76,11 @@ function sproduct_display_form_on_single($content) {
                                 <h3>Select a Subscription Plan</h3>
                                 <?php foreach ($plans as $index => $plan) : ?>
                                     <div class="plan-option">
-                                        <input type="radio" id="plan_<?php echo $index; ?>" name="selected_plan" value="<?php echo esc_attr($plan['name']); ?>" required>
+                                        <input type="radio" id="plan_<?php echo $index; ?>" name="selected_plan" value="<?php echo esc_attr($plan['name']); ?>" data-plan-price="<?php echo esc_attr($plan['price']); ?>" data-plan-duration="<?php echo esc_attr($plan['days']); ?>" data-plan-is-trial="0" required>
                                         <label for="plan_<?php echo $index; ?>">
                                             <strong><?php echo esc_html($plan['name']); ?></strong> - 
-                                            <?php echo esc_html($plan['days']); ?> Days - 
-                                            $<?php echo esc_html($plan['price']); ?>
+                                            <?php echo esc_html($plan['days']); ?> روز - 
+                                            <?php echo esc_html($plan['price']); ?> تومان
                                         </label>
                                     </div>
                                 <?php endforeach; ?>
@@ -119,31 +119,3 @@ function sproduct_enqueue_frontend_assets() {
 }
 add_action('wp_enqueue_scripts', 'sproduct_enqueue_frontend_assets');
 
-
-add_filter('woocommerce_checkout_fields', 'custom_remove_billing_city_for_specific_product');
-
-function custom_remove_billing_city_for_specific_product($fields) {
-    // Get the cart contents
-    $cart = WC()->cart->get_cart();
-    
-    // Initialize product check
-    $only_target_product = true;
-
-    foreach ($cart as $cart_item) {
-        $product = $cart_item['data'];
-        $sku = $product->get_sku();
-
-        // Check if the SKU matches the specific product
-        if ($sku !== 's_prod_virtual') {
-            $only_target_product = false;
-            break;
-        }
-    }
-
-    // If only the target product is in the cart, remove the billing city field
-    if ($only_target_product) {
-        unset($fields['billing']['billing_city']);
-    }
-
-    return $fields;
-}
