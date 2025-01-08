@@ -62,7 +62,6 @@ jQuery(document).ready(function ($) {
                     planDuration: planDuration,
                     requestType: requestType,
                     // form_data: JSON.stringify(form.serialize()),
-                    // post_id: form.closest('#sproduct-form-frontend').data('post-id'),
                     nonce: sproductAjax.nonce
                 },
                 success: (res) => {
