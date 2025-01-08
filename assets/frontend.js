@@ -49,6 +49,7 @@ jQuery(document).ready(function ($) {
         //     e.preventDefault();
         // } else {
         //     saveStepData();
+        
             $.ajax({
                 url: sproductAjax.ajaxurl,
                 method: 'POST',
@@ -68,8 +69,8 @@ jQuery(document).ready(function ($) {
                     console.log(res);
                 },
                 error: (xhr, status, error) => {
-                    console.log(xhr.responseText);  // Log the server response
-                    console.log(status, error);     // Log the status and error message
+                    console.log(xhr.responseText);
+                    console.log(status, error);
                     alert('خطا در ارسال فرم.');
                 }
             });
