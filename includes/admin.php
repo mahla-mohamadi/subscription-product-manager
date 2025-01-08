@@ -16,6 +16,98 @@ function create_hidden_virtual_product() {
 }
 add_action('admin_init', 'create_hidden_virtual_product');
 
+
+function register_subscriptions_menu() {
+    add_menu_page(
+        'Subscriptions', // Page title
+        'Subscriptions', // Menu title
+        'manage_options', // Capability
+        'subscriptions',  // Menu slug
+        'subscriptions_page_callback', // Callback function
+        'dashicons-list-view', // Icon
+        25 // Position
+    );
+}
+add_action('admin_menu', 'register_subscriptions_menu');
+
+function subscriptions_page_callback() {
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 's_subscription';
+
+    // Handle pagination
+    $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+    $per_page = 10; // Number of rows per page
+    $offset = ($paged - 1) * $per_page;
+
+    // Handle sorting
+    $orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'id';
+    $order = isset($_GET['order']) && strtolower($_GET['order']) === 'asc' ? 'ASC' : 'DESC';
+
+    // Fetch data
+    $total_items = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+    $results = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT * FROM $table_name ORDER BY $orderby $order LIMIT %d OFFSET %d",
+            $per_page,
+            $offset
+        )
+    );
+
+    // Calculate pagination
+    $total_pages = ceil($total_items / $per_page);
+
+    // Display the table
+    echo '<div class="wrap">';
+    echo '<h1>Subscriptions</h1>';
+    echo '<table class="wp-list-table widefat fixed striped">';
+    echo '<thead>';
+    echo '<tr>';
+    echo '<th scope="col"><a href="?page=subscriptions&orderby=id&order=' . ($order === 'asc' ? 'desc' : 'asc') . '">ID</a></th>';
+    echo '<th scope="col"><a href="?page=subscriptions&orderby=name&order=' . ($order === 'asc' ? 'desc' : 'asc') . '">Name</a></th>';
+    echo '<th scope="col"><a href="?page=subscriptions&orderby=email&order=' . ($order === 'asc' ? 'desc' : 'asc') . '">Email</a></th>';
+    echo '<th scope="col"><a href="?page=subscriptions&orderby=created_at&order=' . ($order === 'asc' ? 'desc' : 'asc') . '">Created At</a></th>';
+    echo '</tr>';
+    echo '</thead>';
+    echo '<tbody>';
+    if (!empty($results)) {
+        foreach ($results as $row) {
+            echo '<tr>';
+            echo '<td>' . esc_html($row->id) . '</td>';
+            echo '<td>' . esc_html($row->name) . '</td>';
+            echo '<td>' . esc_html($row->email) . '</td>';
+            echo '<td>' . esc_html($row->created_at) . '</td>';
+            echo '</tr>';
+        }
+    } else {
+        echo '<tr><td colspan="4">No subscriptions found.</td></tr>';
+    }
+    echo '</tbody>';
+    echo '</table>';
+
+    // Display pagination
+    echo '<div class="tablenav bottom">';
+    echo '<div class="tablenav-pages">';
+    if ($total_pages > 1) {
+        $base = add_query_arg('paged', '%#%', remove_query_arg('orderby', remove_query_arg('order')));
+        echo paginate_links([
+            'base'      => $base,
+            'format'    => '',
+            'current'   => $paged,
+            'total'     => $total_pages,
+            'prev_text' => '&laquo;',
+            'next_text' => '&raquo;',
+        ]);
+    }
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+}
+
+
+
+
+
 function sproduct_add_custom_columns($columns) {
     $columns['form_data'] = 'Form Data';
     return $columns;
