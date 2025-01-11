@@ -126,6 +126,7 @@ jQuery(document).ready(function ($) {
         nextBtn.toggle(stepIndex !== steps.length - 1);
         submitBtn.toggle(stepIndex === steps.length - 1);
     }
+    
     // form.on('input change', 'input, textarea, select', function () {
     //     const input = $(this);
     //     formData[input.attr('name')] = input.attr('type') === 'checkbox'
