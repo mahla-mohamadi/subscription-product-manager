@@ -120,29 +120,6 @@ jQuery(document).ready(function ($) {
                 inputDiv.find('.checkbox-repeater').remove();
                 if (newType === 'checkbox_group') {
                     const repeater = $('<div class="checkbox-repeater"></div>');
-
-                    // Selection mode toggle
-                    const selectionModeToggle = $(`
-                        <div class="selection-mode-toggle">
-                            <label>
-                                <input type="radio" name="selection_mode_${stepIndex}_${inputIndex}" value="multi" checked> Multi-Select
-                            </label>
-                            <label>
-                                <input type="radio" name="selection_mode_${stepIndex}_${inputIndex}" value="single"> Single-Select
-                            </label>
-                        </div>
-                    `);
-                    // Set the initial selection mode based on formData
-                    const selectionMode = formData[stepIndex].inputs[inputIndex].selectionMode || 'multi';
-                    selectionModeToggle.find(`input[value="${selectionMode}"]`).prop('checked', true);
-
-                    // Save the selection mode when toggled
-                    selectionModeToggle.on('change', 'input', function () {
-                        formData[stepIndex].inputs[inputIndex].selectionMode = $(this).val();
-                        saveForm();
-                    });
-
-                    repeater.append(selectionModeToggle);
                     const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
                     repeater.append(addOptionBtn);
 
@@ -165,6 +142,9 @@ jQuery(document).ready(function ($) {
                     repeater.on('input', '.checkbox-option', function () {
                         const options = [];
                         repeater.find('.checkbox-option').each(function () {
+                            options.push($(this).val().trim());
+                        });
+                        $(this).closest('.checkbox-repeater').find('.checkbox-option').each(function () {
                             options.push($(this).val().trim());
                         });
                         formData[stepIndex].inputs[inputIndex].options = options;
@@ -204,17 +184,14 @@ jQuery(document).ready(function ($) {
             });
             if (input.type === 'checkbox_group') {
                 const repeater = $('<div class="checkbox-repeater"></div>');
-                const selectionMode = input.selectionMode || 'multi';
                 // Restore saved options
-                const options = input.options || [];
-                if (options && input.options.length > 0) {
-                    options.forEach((option, index) => {
+                if (input.options && input.options.length > 0) {
+                    input.options.forEach((option, index) => {
                         const optionDiv = $(`
-                        <div class="checkbox-item">
-                            <input type="${selectionMode === 'single' ? 'radio' : 'checkbox'}" name="group_${stepIndex}_${inputIndex}" disabled>
-                            <input type="text" value="${option}" class="checkbox-option" placeholder="Option ${index + 1}">
-                            <button type="button" class="delete-option">X</button>
-                        </div>
+                            <div class="checkbox-item">
+                                <input type="text" value="${option}" class="checkbox-option" placeholder="Option ${index + 1}">
+                                <button type="button" class="delete-option">X</button>
+                            </div>
                         `);
                         repeater.append(optionDiv);
                     });
@@ -237,15 +214,7 @@ jQuery(document).ready(function ($) {
                     $(this).closest('.checkbox-item').remove();
                     saveForm(); // Save changes
                 });
-                // Save dynamically when editing options
-                repeater.on('input', '.checkbox-option', function () {
-                    const options = [];
-                    $(this).closest('.checkbox-repeater').find('.checkbox-option').each(function () {
-                        options.push($(this).val().trim());
-                    });
-                    formData[stepIndex].inputs[inputIndex].options = options; // Update options in formData
-                    saveForm();
-                });
+
                 inputDiv.append(repeater);
             }
             container.append(inputDiv);
@@ -283,15 +252,13 @@ jQuery(document).ready(function ($) {
                 const inputType = $(this).find('.input-type').val();
                 formData[stepIndex].inputs[inputIndex].type = inputType;
     
+                // Capture checkbox group options
                 if (inputType === 'checkbox_group') {
                     const options = [];
                     $(this).find('.checkbox-option').each(function () {
-                        options.push($(this).val().trim());
+                        options.push($(this).val().trim()); // Save trimmed value
                     });
                     formData[stepIndex].inputs[inputIndex].options = options;
-                    // Save selection mode
-                    const selectionMode = $(this).find('input[name^="selection_mode"]:checked').val();
-                    formData[stepIndex].inputs[inputIndex].selectionMode = selectionMode || 'multi';
                 }
             });
         });
