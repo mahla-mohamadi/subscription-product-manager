@@ -6,7 +6,6 @@ jQuery(document).ready(function ($) {
     let formData = window.sproductFormData && Array.isArray(window.sproductFormData)
         ? window.sproductFormData
         : [];
-
     renderForm();
     addStepBtn.on('click', function () {
         const newStep = {
@@ -21,7 +20,6 @@ jQuery(document).ready(function ($) {
     // Render Form Steps and Inputs
     function renderForm() {
         formBuilder.html('');
-
         formData.forEach((step, stepIndex) => {
             const stepDiv = $(`
                 <div class="step" data-step-index="${stepIndex}">
@@ -38,7 +36,6 @@ jQuery(document).ready(function ($) {
                     <div class="inputs" data-step-index="${stepIndex}"></div>
                 </div>
             `);
-
             stepDiv.find('.step-condition').val(step.condition || '').on('change', function () {
                 formData[stepIndex].condition = $(this).val();
                 saveForm();
@@ -67,15 +64,12 @@ jQuery(document).ready(function ($) {
                     saveForm();
                 }
             });
-
             formBuilder.append(stepDiv);
             renderInputs(stepDiv.find('.inputs'), step.inputs, stepIndex);
         });
-
         saveForm();
         makeSortable();
     }
-
     // Render Individual Inputs
     function renderInputs(container, inputs, stepIndex) {
         container.html('');
@@ -109,7 +103,16 @@ jQuery(document).ready(function ($) {
             inputDiv.find('label').on('input', function () {
                 formData[stepIndex].inputs[inputIndex].label = $(this).text();
                 saveForm();
-            });
+            });   
+                     
+            inputDiv.find('.delete-input-btn').on('click', function () {
+                if (confirm('Delete this input?')) {
+                    formData[stepIndex].inputs.splice(inputIndex, 1);
+                    renderInputs(container, formData[stepIndex].inputs, stepIndex);
+                    saveForm();
+                }
+            });      
+
             inputDiv.find('.input-type').on('change', function () {
                 const newType = $(this).val();
                 formData[stepIndex].inputs[inputIndex].type = $(this).val();
@@ -132,20 +135,14 @@ jQuery(document).ready(function ($) {
                         `);
                         repeater.append(newOption);
                     });
-
                     repeater.on('click', '.delete-option', function () {
                         $(this).closest('.checkbox-item').remove();
                     });
-
                     // Append the repeater below the input
                     inputDiv.append(repeater);
                 }
-
                 saveForm();
             });
-
-
-
             // Update placeholder
             inputDiv.find('.placeholder-input').on('input', function () {
                 formData[stepIndex].inputs[inputIndex].placeholder = $(this).val();
@@ -198,14 +195,8 @@ jQuery(document).ready(function ($) {
                 inputDiv.append(repeater);
             }
             container.append(inputDiv);
-
-
-            
-        });
-        
+        });   
     }
-
-
     // Make Steps and Inputs Sortable
     function makeSortable() {
         if (typeof Sortable !== 'undefined') {
@@ -232,7 +223,6 @@ jQuery(document).ready(function ($) {
             });
         }
     }
-
     function saveForm() {
         $('.step').each(function (stepIndex) {
             $(this).find('.input-item').each(function (inputIndex) {
@@ -250,10 +240,7 @@ jQuery(document).ready(function ($) {
         });
         hiddenInput.val(JSON.stringify(formData));
     }
-
     $('form').on('submit', function () {
         saveForm();
     });
 });
-
-
