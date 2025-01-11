@@ -39,7 +39,7 @@ function subscriptions_page_callback() {
 
     // Handle pagination
     $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
-    $per_page = 1; // Number of rows per page
+    $per_page = 10; // Number of rows per page
     $offset = ($paged - 1) * $per_page;
 
     // Handle sorting

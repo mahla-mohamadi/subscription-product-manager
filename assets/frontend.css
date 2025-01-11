@@ -13,16 +13,182 @@ button {
 button:disabled {
     display: none !important;
 }
+
 input.invalid {
     border: 2px solid red;
     background-color: #ffe6e6;
 }
+
 .checkbox-group {
     margin-top: 10px;
 }
+
 .checkbox-group div {
     margin-bottom: 8px;
 }
+
 .checkbox-group label {
     cursor: pointer;
+}
+
+.mainView,
+main#primary {
+    max-width: 1150px;
+    padding: 0 15px;
+    margin: auto;
+}
+
+#sproduct-form-frontend {
+    margin-bottom: 40px;
+    margin-top: 20px;
+
+    .sproduct-step {
+        border: 1px solid #ededed;
+        border-radius: 16px;
+        padding: 10px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+
+        h3 {
+            width: 100%;
+            text-align: center;
+        }
+
+        .sproduct-input {
+            width: 100%;
+        }
+    }
+
+    .sproduct-plans {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 30px auto 20px;
+
+        .plan-option {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+
+            label {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                font-size: 15px;
+                font-weight: 400;
+
+                strong {
+                    font-size: 18px;
+                    font-weight: 700;
+                }
+            }
+        }
+
+        h3 {
+            margin-bottom: 40px;
+        }
+
+        input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #0073e6;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="radio"]:checked {
+            background-color: #0073e6;
+            border-color: #005bb5;
+        }
+    }
+
+    .sproduct-navigation {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 20px;
+
+        button {
+            color: #fff;
+            background-color: #234982;
+            font-weight: 600;
+            padding: 10px 25px;
+            font-size: 15px;
+            border-radius: 8px;
+            transition: all 0.4s linear;
+            display: block;
+            width: max-content;
+        }
+
+        button:hover {
+            background-color: #0f2648;
+        }
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="url"],
+    input[type="password"],
+    input[type="search"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="range"],
+    input[type="date"],
+    input[type="month"],
+    input[type="week"],
+    input[type="time"],
+    input[type="datetime"],
+    input[type="datetime-local"],
+    input[type="color"],
+    input[type="telephone"],
+    textarea {
+        width: 100%;
+        border-style: solid !important;
+        border-width: 1px !important;
+        border-color: rgba(0, 0, 0, 0.2509803922) !important;
+        color: #606266 !important;
+        padding: 11px 15px !important;
+        transition: all 0.4s;
+        border-radius: 7px !important;
+        margin-top: 5px;
+
+        &:focus-visible {
+            outline: 1px solid #858585;
+        }
+
+        &::placeholder {
+            font-size: 13px;
+            color: #808080;
+        }
+    }
+
+    textarea {
+        min-height: 100px;
+        max-height: 220px;
+        max-width: 100%;
+        min-width: 100%;
+    }
+
+    label {
+        display: block;
+        font-size: 14px;
+        color: #0a2540;
+        font-weight: 600;
+        margin: 20px 0px 10px;
+    }
+
+}
+
+
+
+.half-width {
+    width: 50% !important;
 }
