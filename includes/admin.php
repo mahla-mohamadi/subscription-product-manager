@@ -32,8 +32,7 @@ function register_subscriptions_menu()
 }
 add_action('admin_menu', 'register_subscriptions_menu');
 
-function subscriptions_page_callback()
-{
+function subscriptions_page_callback() {
     global $wpdb;
 
     $table_name = $wpdb->prefix . 's_subscriptions';
@@ -57,15 +56,7 @@ function subscriptions_page_callback()
             $offset
         )
     );
-    echo '<pre>';
-    print_r($total_items);
-    echo '</pre>';
-    echo '<pre>';
-    print_r($orderby);
-    echo '</pre>';
-    echo '<pre>';
-    print_r($order);
-    echo '</pre>';
+
     // Calculate pagination
     $total_pages = ceil($total_items / $per_page);
 
@@ -75,13 +66,40 @@ function subscriptions_page_callback()
     echo '<table class="wp-list-table widefat fixed striped">';
     echo '<thead>';
     echo '<tr>';
-    echo '<th scope="col"><a href="?page=subscriptions&orderby=user_id&order=' . ($order === 'asc' ? 'desc' : 'asc') . '">شناسه کاربر</a></th>';
-    echo '<th scope="col"><a href="?page=subscriptions&orderby=sproduct_id&order=' . ($order === 'asc' ? 'desc' : 'asc') . '">شناسه محصول</a></th>';
-    echo '<th scope="col"><a href="?page=subscriptions&orderby=start_date&order=' . ($order === 'asc' ? 'desc' : 'asc') . '">شروع اشتراک</a></th>';
-    echo '<th scope="col"><a href="?page=subscriptions&orderby=end_date&order=' . ($order === 'asc' ? 'desc' : 'asc') . '">پایان اشتراک</a></th>';
-    echo '<th scope="col"><a href="?page=subscriptions&orderby=amount&order=' . ($order === 'asc' ? 'desc' : 'asc') . '">هزینه</a></th>';
-    echo '<th scope="col"><a href="?page=subscriptions&orderby=plan&order=' . ($order === 'asc' ? 'desc' : 'asc') . '">پلن</a></th>';
-    echo '<th scope="col"><a href="?page=subscriptions&orderby=status&order=' . ($order === 'asc' ? 'desc' : 'asc') . '">وضعیت</a></th>';
+
+    // Define sortable columns and display the sorting icons
+    $columns = [
+        'user_id' => 'شناسه کاربر',
+        'sproduct_id' => 'شناسه محصول',
+        'start_date' => 'شروع اشتراک',
+        'end_date' => 'پایان اشتراک',
+        'amount' => 'هزینه',
+        'plan' => 'پلن',
+        'status' => 'وضعیت'
+    ];
+
+    foreach ($columns as $column => $label) {
+        // Determine the opposite order for sorting
+        $sort_order = ($orderby === $column && $order === 'ASC') ? 'DESC' : 'ASC';
+        // Set the sorting icon based on the current sorting order
+        $icon = '';
+        if ($orderby === $column) {
+            // If current order is asc, show the down arrow, otherwise show the up arrow
+            $icon = ($order === 'asc') 
+                ? '<span class="dashicons dashicons-arrow-up-alt2"></span>' 
+                : '<span class="dashicons dashicons-arrow-down-alt2"></span>';
+        }
+
+        // Create URL with sorting parameters
+        $url = add_query_arg([
+            'page' => 'subscriptions',
+            'orderby' => $column,
+            'order' => $sort_order
+        ]);
+        
+        echo '<th scope="col"><a href="' . esc_url($url) . '">' . $label . ' ' . $icon . '</a></th>';
+    }
+
     echo '</tr>';
     echo '</thead>';
     echo '<tbody>';
@@ -121,6 +139,8 @@ function subscriptions_page_callback()
     echo '</div>';
     echo '</div>';
 }
+
+
 
 
 
