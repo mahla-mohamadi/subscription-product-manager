@@ -190,5 +190,9 @@ main#primary {
 
 
 .half-width {
-    width: 50% !important;
+    width: 48% !important;
+}
+
+.third-width {
+    width: 30% !important;
 }

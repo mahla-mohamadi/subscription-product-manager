@@ -32,7 +32,8 @@ function register_subscriptions_menu()
 }
 add_action('admin_menu', 'register_subscriptions_menu');
 
-function subscriptions_page_callback() {
+function subscriptions_page_callback()
+{
     global $wpdb;
 
     $table_name = $wpdb->prefix . 's_subscriptions';
@@ -85,8 +86,8 @@ function subscriptions_page_callback() {
         $icon = '';
         if ($orderby === $column) {
             // If current order is asc, show the down arrow, otherwise show the up arrow
-            $icon = ($order === 'asc') 
-                ? '<span class="dashicons dashicons-arrow-up-alt2"></span>' 
+            $icon = ($order === 'asc')
+                ? '<span class="dashicons dashicons-arrow-up-alt2"></span>'
                 : '<span class="dashicons dashicons-arrow-down-alt2"></span>';
         }
 
@@ -96,13 +97,13 @@ function subscriptions_page_callback() {
             'orderby' => $column,
             'order' => $sort_order
         ]);
-        
+
         echo '<th scope="col"><a href="' . esc_url($url) . '">' . $label . ' ' . $icon . '</a></th>';
     }
 
     echo '</tr>';
     echo '</thead>';
-    echo '<tbody>';
+    echo '<tbody class="subscriptionsTableMainBody">';
     if (!empty($results)) {
         foreach ($results as $row) {
             echo '<tr>';
@@ -112,7 +113,11 @@ function subscriptions_page_callback() {
             echo '<td>' . esc_html($row->end_date) . '</td>';
             echo '<td>' . esc_html($row->amount) . '</td>';
             echo '<td>' . esc_html($row->plan) . '</td>';
-            echo '<td>' . esc_html($row->status) . '</td>';
+            if (esc_html($row->status) == "active") {
+                echo '<td class="activeButton"><span>فعال</span></td>';
+            } else {
+                echo '<td class="DeactiveButton"><span>غیر فعال</span></td>';
+            }
             echo '</tr>';
         }
     } else {
