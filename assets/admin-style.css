@@ -53,3 +53,35 @@
 .plan-item .remove-plan:hover {
     opacity: 0.85;
 }
+
+
+div#sproduct-form-builder {
+    .step-header {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: space-between;
+        align-items: center;
+    }
+    [contenteditable="true"] {
+        border-bottom: 1px solid #b7b7b7;
+        width: 25%;
+        outline: 0;
+        &:focus-visible {
+            border-bottom: 1px solid #393939;
+        }
+    }
+    .form-steps {
+        .inputs {
+            padding: 10px;
+            margin: 20px 0;
+
+            .input-item .input-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin: 16px 0;
+                gap: 10px;
+            }
+        }
+    }
+}
