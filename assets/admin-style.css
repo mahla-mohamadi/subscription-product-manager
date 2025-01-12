@@ -54,6 +54,27 @@
     opacity: 0.85;
 }
 
+.input-header select,
+.input-header input:not([type="checkbox"]),
+.step-condition,
+button.add-input-btn.button {
+    border: 1px solid #cecece;
+    padding: 6px 14px 6px 30px !important;
+    border-radius: 6px !important;
+}
+
+.input-header input[type="checkbox"] {
+    margin-right: auto;
+}
+.input-header button.delete-input-btn.button.button-small.button-danger {
+    margin-right: auto;
+}
+
+.step-header h3 {
+    border: 1px solid #cecece;
+    padding: 12px 14px 12px 30px;
+    border-radius: 6px;
+}
 
 div#sproduct-form-builder {
     .step-header {
@@ -91,6 +112,7 @@ div#sproduct-form-builder {
 
 .subscriptionsTableMainBody {
     background-color: red;
+
     .activeButton {
         span {
             background-color: #13aa13;
