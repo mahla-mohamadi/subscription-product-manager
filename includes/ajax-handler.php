@@ -1,6 +1,6 @@
 <?php
 // Add virtual product to cart with custom data
-function add_custom_virtual_product_to_cart($spn, $pn, $price , $duration , $request) {
+function add_custom_virtual_product_to_cart($spn, $pn, $price , $duration , $request , $form) {
     $product_sku = 's_prod_virtual';
     $product_id = wc_get_product_id_by_sku($product_sku);
 
@@ -25,11 +25,12 @@ function add_custom_virtual_product_to_cart($spn, $pn, $price , $duration , $req
         'pn' => $pn,
         'price' => $price,
         'duration' => $duration,
-        'request' => $request
+        'request' => $request,
+        'form' => $form
     );
 
     // Add the product to the cart
-    WC()->cart->add_to_cart($product_id, 1, 0, array(), $cart_item_data);
+    return WC()->cart->add_to_cart($product_id, 1, 0, array(), $cart_item_data);
 }
 
 
@@ -72,14 +73,20 @@ function save_custom_order_item_meta($item, $cart_item_key, $values, $order) {
     if (isset($values['pn'])) {
         $item->add_meta_data(__('پلن', 'woocommerce'), $values['pn'], true);
     }
-    if (isset($values['price'])) {
-        $item->add_meta_data(__('قیمت', 'woocommerce'), wc_price($values['price']), true);
-    }
+    // if (isset($values['price'])) {
+    //     $item->add_meta_data(__('قیمت', 'woocommerce'), wc_price($values['price']), true);
+    // }
     if (isset($values['duration'])) {
         $item->add_meta_data(__('مدت زمان', 'woocommerce'), $values['duration'], true);
     }
     if (isset($values['request'])) {
         $item->add_meta_data(__('اقدام', 'woocommerce'), $values['request'], true);
+    }
+    if (isset($values['form'])) {
+        $item->add_meta_data(__('_sproduct_form', 'woocommerce'), $values['form'], true);
+    }
+    if (isset($values['price'])) {
+        $item->add_meta_data(__('_sproduct_paid', 'woocommerce'), $values['price'], true);
     }
 }
 
@@ -110,7 +117,8 @@ function sproduct_create_subscription_on_order($order_id) {
     foreach ($order->get_items() as $item_id => $item) {
         $spn = wc_get_order_item_meta($item_id, 'اشتراک', true);  // Subscription Product Name
         $pn = wc_get_order_item_meta($item_id, 'پلن', true);    // Plan Name
-        $price = wc_get_order_item_meta($item_id, 'قیمت', true);  // Price
+        // $price = wc_get_order_item_meta($item_id, 'قیمت', true);  // Price
+        $price = $item->get_total();
         $duration = wc_get_order_item_meta($item_id, 'مدت زمان', true);  // Duration in days
         if (empty($spn) || empty($pn) || empty($price) || empty($duration)) {
             error_log("Missing subscription item meta for order #{$order_id}, item #{$item_id}");
@@ -161,5 +169,12 @@ function sproduct_submit_form() {
     $planPrice  = isset($_POST['planPrice']) ? sanitize_text_field($_POST['planPrice']) : '';
     $planDuration  = isset($_POST['planDuration']) ? sanitize_text_field($_POST['planDuration']) : '';
     $requestType  = isset($_POST['requestType']) ? sanitize_text_field($_POST['requestType']) : '';
-    add_custom_virtual_product_to_cart($productName , $planName, $planPrice , $planDuration , $requestType);
+    $submittedFormData  = isset($_POST['submittedFormData']) ? sanitize_text_field($_POST['submittedFormData']) : '';
+    $cart_item_key = add_custom_virtual_product_to_cart($productName , $planName, $planPrice , $planDuration , $requestType , $submittedFormData);
+    if($cart_item_key){
+        wp_send_json_success(['added'=>1]);
+    }
+    else{
+        wp_send_json_error(['added'=>0]);
+    }
 }

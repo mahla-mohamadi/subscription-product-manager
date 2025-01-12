@@ -36,7 +36,7 @@ jQuery(document).ready(function ($) {
 
     form.on('submit', function (e) {
         e.preventDefault();
-        let submittedFormData = $(this).serialize();
+        let submittedFormData = JSON.stringify($(this).serialize());
         let postID = $('#sproduct-form-frontend').attr('data-post-id');
         let planPrice = $('input[name=selected_plan]:checked').attr('data-plan-price');
         let planDuration = $('input[name=selected_plan]:checked').attr('data-plan-duration');
@@ -62,11 +62,13 @@ jQuery(document).ready(function ($) {
                     planPrice: planPrice,
                     planDuration: planDuration,
                     requestType: requestType,
-                    // form_data: JSON.stringify(form.serialize()),
+                    submittedFormData: submittedFormData,
                     nonce: sproductAjax.nonce
                 },
                 success: (res) => {
-                    console.log(res);
+                    if(res.data.added===1){
+                        window.location.href = '../../cart';
+                    }
                 },
                 error: (xhr, status, error) => {
                     console.log(xhr.responseText);
