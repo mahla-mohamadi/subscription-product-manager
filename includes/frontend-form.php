@@ -26,13 +26,12 @@ function sproduct_display_form_on_single($content) {
                                     <div class="checkbox-group">
                                         <?php foreach ($input['options'] as $option_index => $option) : ?>
                                             <div>
-                                                    <label>
-                                                        <input type="checkbox" 
-                                                            name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>[]" 
-                                                            value="<?php echo esc_attr($option); ?>">
-                                                        <span class="wcpa_checkbox_custom"></span>
-                                                        <?php echo esc_html($option); ?>
-                                                    </label>
+                                            <label>
+                                                <input type="checkbox" 
+                                                    name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>[]" 
+                                                    value="<?php echo esc_attr($option); ?>">
+                                                <?php echo esc_html($option); ?>
+                                            </label>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
