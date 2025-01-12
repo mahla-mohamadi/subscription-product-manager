@@ -12,7 +12,7 @@ function sproduct_create_db_tables() {
             end_date DATE NOT NULL,
             renewal_date DATE DEFAULT NULL,
             plan TEXT NOT NULL,
-            amount DECIMAL(10, 2) NOT NULL,
+            amount INT NOT NULL,
             currency VARCHAR(10) NOT NULL DEFAULT 'USD',
             status VARCHAR(20) NOT NULL DEFAULT 'active',
             payment_method VARCHAR(50) DEFAULT NULL,

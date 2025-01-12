@@ -111,7 +111,7 @@ function subscriptions_page_callback()
             echo '<td>' . esc_html($row->sproduct_id) . '</td>';
             echo '<td>' . esc_html($row->start_date) . '</td>';
             echo '<td>' . esc_html($row->end_date) . '</td>';
-            echo '<td>' . esc_html($row->amount) . '</td>';
+            echo '<td>' . esc_html($row->amount) . ' تومان</td>';
             echo '<td>' . esc_html($row->plan) . '</td>';
             if (esc_html($row->status) == "active") {
                 echo '<td class="activeButton"><span>فعال</span></td>';

@@ -11,5 +11,6 @@ function sproduct_custom_post_type() {
         'supports' => ['title'],
         'show_in_rest' => true,
     ]);
+    flush_rewrite_rules();
 }
 add_action('init', 'sproduct_custom_post_type');

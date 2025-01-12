@@ -36,7 +36,7 @@ jQuery(document).ready(function ($) {
 
     form.on('submit', function (e) {
         e.preventDefault();
-        let submittedFormData = $(this).serialize();
+        let submittedFormData = JSON.stringify($(this).serialize());
         let postID = $('#sproduct-form-frontend').attr('data-post-id');
         let planPrice = $('input[name=selected_plan]:checked').attr('data-plan-price');
         let planDuration = $('input[name=selected_plan]:checked').attr('data-plan-duration');
@@ -49,31 +49,33 @@ jQuery(document).ready(function ($) {
         //     e.preventDefault();
         // } else {
         //     saveStepData();
-
-        $.ajax({
-            url: sproductAjax.ajaxurl,
-            method: 'POST',
-            dataType: 'json',
-            data: {
-                action: 'sproduct_submit_form',
-                submittedFormData: submittedFormData,
-                postID: postID,
-                planName: planName,
-                planPrice: planPrice,
-                planDuration: planDuration,
-                requestType: requestType,
-                // form_data: JSON.stringify(form.serialize()),
-                nonce: sproductAjax.nonce
-            },
-            success: (res) => {
-                console.log(res);
-            },
-            error: (xhr, status, error) => {
-                console.log(xhr.responseText);
-                console.log(status, error);
-                alert('خطا در ارسال فرم.');
-            }
-        });
+        
+            $.ajax({
+                url: sproductAjax.ajaxurl,
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'sproduct_submit_form',
+                    submittedFormData: submittedFormData,
+                    postID: postID,
+                    planName: planName,
+                    planPrice: planPrice,
+                    planDuration: planDuration,
+                    requestType: requestType,
+                    submittedFormData: submittedFormData,
+                    nonce: sproductAjax.nonce
+                },
+                success: (res) => {
+                    if(res.data.added===1){
+                        window.location.href = '../../cart';
+                    }
+                },
+                error: (xhr, status, error) => {
+                    console.log(xhr.responseText);
+                    console.log(status, error);
+                    alert('خطا در ارسال فرم.');
+                }
+            });
         // }
     });
     function validateStep(stepIndex) {
