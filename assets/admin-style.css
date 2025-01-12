@@ -24,6 +24,9 @@
     padding: 8px;
     margin-bottom: 15px;
     box-sizing: border-box;
+    border: 1px solid #cecece !important;
+    padding: 6px 14px 6px 30px !important;
+    border-radius: 6px !important;
 }
 
 .plan-item .remove-plan {
@@ -56,9 +59,8 @@
 
 .input-header select,
 .input-header input:not([type="checkbox"]),
-.step-condition,
-button.add-input-btn.button {
-    border: 1px solid #cecece;
+.step-condition {
+    border: 1px solid #cecece !important;
     padding: 6px 14px 6px 30px !important;
     border-radius: 6px !important;
 }
@@ -66,14 +68,46 @@ button.add-input-btn.button {
 .input-header input[type="checkbox"] {
     margin-right: auto;
 }
+
 .input-header button.delete-input-btn.button.button-small.button-danger {
     margin-right: auto;
+}
+
+button.delete-input-btn.button.button-small.button-danger,
+button.delete-step-btn.button.button-danger {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 14px;
+    font-size: 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    outline: 0;
+    border: 1px solid gainsboro;
+}
+
+.input-header label {
+    border: 1px solid #cecece !important;
+    padding: 10px 14px 10px 30px !important;
+    border-radius: 6px !important;
 }
 
 .step-header h3 {
     border: 1px solid #cecece;
     padding: 12px 14px 12px 30px;
     border-radius: 6px;
+}
+
+button.add-input-btn.button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 7px 14px;
+    font-size: 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    outline: 0;
+    border: 1px solid gainsboro;
 }
 
 div#sproduct-form-builder {
@@ -89,9 +123,6 @@ div#sproduct-form-builder {
         width: 25%;
         outline: 0;
 
-        &:focus-visible {
-            border-bottom: 1px solid #393939;
-        }
     }
 
     .form-steps {
@@ -134,4 +165,26 @@ div#sproduct-form-builder {
             font-weight: 600;
         }
     }
+}
+
+.checkbox-repeater button.add-option,
+.checkbox-item button.delete-option {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 7px 14px;
+    font-size: 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    outline: 0;
+    border: 1px solid gainsboro;
+}
+.checkbox-repeater .checkbox-item {
+    margin: 14px 10px;
+}
+
+.checkbox-repeater .checkbox-item input {
+    border: 1px solid #cecece !important;
+    padding: 4px 14px 4px 30px !important;
+    border-radius: 6px !important;
 }
