@@ -120,6 +120,19 @@ jQuery(document).ready(function ($) {
                 inputDiv.find('.checkbox-repeater').remove();
                 if (newType === 'checkbox_group') {
                     const repeater = $('<div class="checkbox-repeater"></div>');
+                    const typeSelector = $(`
+                        <select class="checkbox-type-selector">
+                            <option value="checkbox" ${input.selectionType === 'checkbox' ? 'selected' : ''}>Multiple Selection</option>
+                            <option value="radio" ${input.selectionType === 'radio' ? 'selected' : ''}>Single Selection</option>
+                        </select>
+                    `);
+                    typeSelector.on('change', function () {
+                        const selectedType = $(this).val();
+                        formData[stepIndex].inputs[inputIndex].selectionType = selectedType;
+                        renderOptions(repeater, selectedType, formData[stepIndex].inputs[inputIndex].options || []);
+                        saveForm();
+                    });
+                    repeater.append(typeSelector);
                     const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
                     repeater.append(addOptionBtn);
 
@@ -166,6 +179,18 @@ jQuery(document).ready(function ($) {
                 }
                 saveForm();
             });
+            // Helper function to render options as checkboxes or radio buttons
+            function renderOptions(container, type, options) {
+                container.find('.checkbox-item').remove();
+                options.forEach((option, index) => {
+                    const optionDiv = $(`<div class="checkbox-item">
+                        <input type="${type}" disabled>
+                        <input type="text" value="${option}" class="checkbox-option" placeholder="Option ${index + 1}">
+                        <button type="button" class="delete-option">X</button>
+                    </div>`);
+                    container.append(optionDiv);
+                });
+            }
             // Update placeholder
             inputDiv.find('.placeholder-input').on('input', function () {
                 formData[stepIndex].inputs[inputIndex].placeholder = $(this).val();
@@ -258,11 +283,12 @@ jQuery(document).ready(function ($) {
                     $(this).find('.checkbox-option').each(function () {
                         options.push($(this).val().trim()); // Save trimmed value
                     });
-                    formData[stepIndex].inputs[inputIndex].options = options;
+                    // formData[stepIndex].inputs[inputIndex].options = options;
+                    formData[stepIndex].inputs[inputIndex].selectionType = $(this).find('.checkbox-type-selector').val();
+
                 }
             });
         });
-    
         hiddenInput.val(JSON.stringify(formData)); // Save to hidden input for persistence
     }
     $('form').on('submit', function () {
