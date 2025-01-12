@@ -3,7 +3,7 @@
 function sproduct_add_metabox() {
     add_meta_box(
         'sproduct_form_builder',
-        'Form Builder',
+        'فرم ساز',
         'sproduct_form_builder_callback',
         'sproduct',
         'normal',

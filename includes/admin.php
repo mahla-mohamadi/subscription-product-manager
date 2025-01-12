@@ -40,7 +40,7 @@ function subscriptions_page_callback()
 
     // Handle pagination
     $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
-    $per_page = 10; // Number of rows per page
+    $per_page = 1; // Number of rows per page
     $offset = ($paged - 1) * $per_page;
 
     // Handle sorting
@@ -182,6 +182,14 @@ function sproduct_enqueue_admin_styles($hook)
             );
         }
     }
+    if (isset($_GET['page']) && $_GET['page'] === 'subscriptions') {
+        wp_enqueue_style(
+            'subscriptions-admin-style',
+            SPRODUCT_URL . 'assets/admin-style.css', // همان فایل یا فایل متفاوت
+            [],
+            filemtime(SPRODUCT_PATH . 'assets/admin-style.css')
+        );
+    }
 }
 add_action('admin_enqueue_scripts', 'sproduct_enqueue_admin_styles');
 
@@ -211,7 +219,7 @@ function sproduct_add_plan_repeater_metabox()
 {
     add_meta_box(
         'sproduct_plan_repeater',
-        'Subscription Plans',
+        'طرح های اشتراک',
         'sproduct_plan_repeater_callback',
         'sproduct',
         'normal',  // Display below the content editor
@@ -236,29 +244,29 @@ function sproduct_plan_repeater_callback($post)
             <?php if (!empty($plans)): ?>
                 <?php foreach ($plans as $index => $plan): ?>
                     <div class="plan-item">
-                        <label>Plan Name</label>
+                        <label>نام طرح</label>
                         <input type="text" name="sproduct_plans[<?php echo $index; ?>][name]"
                             value="<?php echo esc_attr($plan['name'] ?? ''); ?>" required />
 
-                        <label>Days</label>
+                        <label>مدت طرح</label>
                         <input type="number" class="days-field" name="sproduct_plans[<?php echo $index; ?>][days]"
                             value="<?php echo esc_attr($plan['days'] ?? ''); ?>" required />
 
-                        <label>Price</label>
+                        <label>قیمت طرح</label>
                         <input type="number" class="price-field" name="sproduct_plans[<?php echo $index; ?>][price]"
                             value="<?php echo esc_attr($plan['price'] ?? ''); ?>" required />
 
-                        <label>Description</label>
+                        <label>توضیحات</label>
                         <textarea
                             name="sproduct_plans[<?php echo $index; ?>][description]"><?php echo esc_textarea($plan['description'] ?? ''); ?></textarea>
 
-                        <button type="button" class="remove-plan button">Remove</button>
+                        <button type="button" class="remove-plan button">حذف</button>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
 
-        <button type="button" id="add-plan" class="button">+ Add Plan</button>
+        <button type="button" id="add-plan" class="button">افزودن طرح +</button>
     </div>
     <?php
 }

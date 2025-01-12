@@ -21,6 +21,9 @@ input.invalid {
 
 .checkbox-group {
     margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .checkbox-group div {
@@ -45,7 +48,7 @@ main#primary {
     .sproduct-step {
         border: 1px solid #ededed;
         border-radius: 16px;
-        padding: 10px 30px;
+        padding: 10px 30px 40px;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -185,8 +188,18 @@ main#primary {
         margin: 20px 0px 10px;
     }
 
+
+
 }
 
+
+.checkbox-group label {
+    display: flex !important;
+    flex-direction: column;
+    width: fit-content;
+    gap: 4px;
+    font-size: 12px !important;
+}
 
 
 .half-width {
@@ -195,4 +208,9 @@ main#primary {
 
 .third-width {
     width: 30% !important;
+}
+
+.input-error {
+    font-size: 13px;
+    color: #d20808;
 }

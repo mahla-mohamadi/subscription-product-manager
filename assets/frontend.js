@@ -29,7 +29,7 @@ jQuery(document).ready(function ($) {
     }
     nextBtn.on('click', () => handleNavigation(1));
     prevBtn.on('click', () => handleNavigation(-1));
-    
+
     submitBtn.on('click', (e) => {
         if (!validateStep(currentStep)) e.preventDefault();
     });
@@ -49,40 +49,40 @@ jQuery(document).ready(function ($) {
         //     e.preventDefault();
         // } else {
         //     saveStepData();
-        
-            $.ajax({
-                url: sproductAjax.ajaxurl,
-                method: 'POST',
-                dataType: 'json',
-                data: {
-                    action: 'sproduct_submit_form',
-                    submittedFormData: submittedFormData,
-                    postID: postID,
-                    planName: planName,
-                    planPrice: planPrice,
-                    planDuration: planDuration,
-                    requestType: requestType,
-                    // form_data: JSON.stringify(form.serialize()),
-                    nonce: sproductAjax.nonce
-                },
-                success: (res) => {
-                    console.log(res);
-                },
-                error: (xhr, status, error) => {
-                    console.log(xhr.responseText);
-                    console.log(status, error);
-                    alert('خطا در ارسال فرم.');
-                }
-            });
+
+        $.ajax({
+            url: sproductAjax.ajaxurl,
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'sproduct_submit_form',
+                submittedFormData: submittedFormData,
+                postID: postID,
+                planName: planName,
+                planPrice: planPrice,
+                planDuration: planDuration,
+                requestType: requestType,
+                // form_data: JSON.stringify(form.serialize()),
+                nonce: sproductAjax.nonce
+            },
+            success: (res) => {
+                console.log(res);
+            },
+            error: (xhr, status, error) => {
+                console.log(xhr.responseText);
+                console.log(status, error);
+                alert('خطا در ارسال فرم.');
+            }
+        });
         // }
     });
     function validateStep(stepIndex) {
         let isValid = true;
         const step = steps.eq(stepIndex);
         const validations = [
-            {selector: 'input[type="tel"], input[type="telephone"]', message: 'شماره موبایل باید با 09 شروع شود و 11 رقم باشد.', condition: (v) => !/^09\d{9}$/.test(v)},
-            {selector: 'input[type="email"]', message: 'ایمیل وارد شده معتبر نیست.', condition: (v) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
-            {selector: 'input[type="nationalcode"]', message: 'کد ملی باید دقیقاً 10 رقم باشد.', condition: (v) => v.length !== 10}
+            { selector: 'input[type="tel"], input[type="telephone"]', message: 'شماره موبایل باید با 09 شروع شود و 11 رقم باشد.', condition: (v) => !/^09\d{9}$/.test(v) },
+            { selector: 'input[type="email"]', message: 'ایمیل وارد شده معتبر نیست.', condition: (v) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+            { selector: 'input[type="nationalcode"]', message: 'کد ملی باید دقیقاً 10 رقم باشد.', condition: (v) => v.length !== 10 }
         ];
         step.find('input, textarea').each(function () {
             const value = $(this).val().trim();
@@ -107,7 +107,7 @@ jQuery(document).ready(function ($) {
             }
         });
         return isValid;
-    }    
+    }
     function validateAll() {
         let isValid = true;
         form.find('input, textarea').each(function () {
@@ -126,7 +126,7 @@ jQuery(document).ready(function ($) {
         nextBtn.toggle(stepIndex !== steps.length - 1);
         submitBtn.toggle(stepIndex === steps.length - 1);
     }
-    
+
     // form.on('input change', 'input, textarea, select', function () {
     //     const input = $(this);
     //     formData[input.attr('name')] = input.attr('type') === 'checkbox'
@@ -181,3 +181,92 @@ jQuery(document).ready(function ($) {
         }
     });
 });
+
+
+
+// ذخیره مقادیر فرم در sessionStorage
+document.querySelectorAll("#sproduct-main-form input, #sproduct-main-form textarea").forEach(function (input) {
+    input.addEventListener("input", function () {
+        // برای چک‌باکس‌ها و رادیو باتن‌ها
+        if (input.type === "checkbox" || input.type === "radio") {
+            let selectedValues = [];
+            const checkboxes = document.querySelectorAll(`input[name="${input.name}"]:checked`);
+            checkboxes.forEach(function (checkbox) {
+                selectedValues.push(checkbox.value);
+            });
+            sessionStorage.setItem(input.name, selectedValues.join(","));
+        } else {
+            sessionStorage.setItem(input.name, input.value);
+        }
+    });
+});
+
+// بارگذاری مقادیر ذخیره‌شده هنگام بارگذاری صفحه
+window.addEventListener("load", function () {
+    document.querySelectorAll("#sproduct-main-form input, #sproduct-main-form textarea").forEach(function (input) {
+        const storedValue = sessionStorage.getItem(input.name);
+
+        if (storedValue) {
+            // اگر فیلد از نوع رادیو باتن است، وضعیت انتخاب شده را بازیابی کنیم
+            if (input.type === "radio") {
+                const selectedRadio = document.querySelector(`input[name="${input.name}"][value="${storedValue}"]`);
+                if (selectedRadio) {
+                    selectedRadio.checked = true;
+                }
+            }
+            // اگر فیلد از نوع چک‌باکس است، وضعیت انتخاب شده را بازیابی کنیم
+            else if (input.type === "checkbox") {
+                const selectedValues = storedValue.split(',');
+                const checkboxes = document.querySelectorAll(`input[name="${input.name}"]`);
+                checkboxes.forEach(function (checkbox) {
+                    checkbox.checked = selectedValues.includes(checkbox.value);
+                });
+            }
+            // برای دیگر فیلدها (مثل input text, textarea)، مقدار را به فیلد اختصاص می‌دهیم
+            else {
+                input.value = storedValue;
+            }
+        }
+    });
+
+    const steps = document.querySelectorAll(".sproduct-step");
+    steps.forEach(function (step) {
+        const stepIndex = parseInt(step.getAttribute("data-step"));
+        const storedStep = sessionStorage.getItem('currentStep');
+
+        if (storedStep && parseInt(storedStep) === stepIndex) {
+            step.style.display = "block";
+        } else if (!storedStep && stepIndex === 0) {
+            step.style.display = "block";
+        } else {
+            step.style.display = "none";
+        }
+    });
+});
+
+// مدیریت تغییرات مراحل (steps)
+let currentStep = 0;
+document.getElementById("next-btn").addEventListener("click", function () {
+    const steps = document.querySelectorAll(".sproduct-step");
+    console.log(steps)
+    if (currentStep < steps.length - 1) {
+        currentStep++;
+        sessionStorage.setItem('currentStep', currentStep);
+    }
+
+});
+
+document.getElementById("prev-btn").addEventListener("click", function () {
+    const steps = document.querySelectorAll(".sproduct-step");
+    if (currentStep > 0) {
+        currentStep--;
+        sessionStorage.setItem('currentStep', currentStep);
+    }
+
+    // در صورت برگشت به مرحله اول، دکمه ارسال مخفی می‌شود
+    if (currentStep < steps.length - 1) {
+        document.getElementById("submit-btn").style.display = "none";
+        document.getElementById("next-btn").style.display = "block";
+    }
+});
+

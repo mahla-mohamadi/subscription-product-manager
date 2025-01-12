@@ -73,12 +73,12 @@ function sproduct_display_form_on_single($content) {
                         <!-- Display Plans Only in the Final Step -->
                         <?php if ($step_index === count($form_data) - 1 && !empty($plans)) : ?>
                             <div class="sproduct-plans">
-                                <h3>Select a Subscription Plan</h3>
+                                <h3>پلن اشتراک خود را انتخاب کنید :</h3>
                                 <?php foreach ($plans as $index => $plan) : ?>
                                     <div class="plan-option">
                                         <input type="radio" id="plan_<?php echo $index; ?>" name="selected_plan" value="<?php echo esc_attr($plan['name']); ?>" data-plan-price="<?php echo esc_attr($plan['price']); ?>" data-plan-duration="<?php echo esc_attr($plan['days']); ?>" data-plan-is-trial="0" required>
                                         <label for="plan_<?php echo $index; ?>">
-                                            <strong><?php echo esc_html($plan['name']); ?></strong> - 
+                                            <strong><?php echo esc_html($plan['name']); ?></strong> 
                                             <?php echo esc_html($plan['days']); ?> روز - 
                                             <?php echo esc_html($plan['price']); ?> تومان
                                         </label>
@@ -90,9 +90,9 @@ function sproduct_display_form_on_single($content) {
                     </div>
                 <?php endforeach; ?>
                 <div class="sproduct-navigation">
-                    <button type="button" id="prev-btn" disabled>Previous</button>
-                    <button type="button" id="next-btn">Next</button>
-                    <button type="submit" id="submit-btn" style="display:none;">Submit</button>
+                    <button type="button" id="prev-btn" disabled>قبلی</button>
+                    <button type="button" id="next-btn">بعدی</button>
+                    <button type="submit" id="submit-btn" style="display:none;">ارسال</button>
                 </div>
             </form>
         </div>

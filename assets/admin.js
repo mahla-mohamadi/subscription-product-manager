@@ -32,7 +32,7 @@ jQuery(document).ready(function ($) {
                         <option value="checkbox">Show if Checkbox</option>
                         <option value="select">Show if Select</option>
                     </select>
-                    <button type="button" class="add-input-btn button">+ Add Input</button>
+                    <button type="button" class="add-input-btn button">افزودن +</button>
                     <div class="inputs" data-step-index="${stepIndex}"></div>
                 </div>
             `);
@@ -90,7 +90,7 @@ jQuery(document).ready(function ($) {
                         </select>
                         <!-- Placeholder Field -->
                         <input type="text" class="placeholder-input" placeholder="Placeholder text" value="${input.placeholder || ''}" />    
-                        <input type="checkbox" class="required-checkbox" ${input.required ? 'checked' : ''} /> Required
+                        <input type="checkbox" class="required-checkbox" ${input.required ? 'checked' : ''} /> ضروری
                         <button type="button" class="delete-input-btn button button-small button-danger">X</button>
                     </div>
                 </div>
@@ -133,7 +133,7 @@ jQuery(document).ready(function ($) {
                         saveForm();
                     });
                     repeater.append(typeSelector);
-                    const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
+                    const addOptionBtn = $('<button type="button" class="add-option">افزودن +</button>');
                     repeater.append(addOptionBtn);
 
                     addOptionBtn.on('click', function () {
@@ -221,7 +221,7 @@ jQuery(document).ready(function ($) {
                         repeater.append(optionDiv);
                     });
                 }
-                const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
+                const addOptionBtn = $('<button type="button" class="add-option">افزودن +</button>');
                 repeater.append(addOptionBtn);            
                 addOptionBtn.on('click', function () {
                     const newIndex = repeater.find('.checkbox-item').length + 1;

@@ -3,9 +3,15 @@
 }
 
 .plan-item {
-    border: 1px solid #ddd;
     padding: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    position: relative;
+}
+
+.plan-item:nth-child(2n-1) {
+    padding: 15px;
+    margin-bottom: 20px;
     background-color: #f9f9f9;
     border-radius: 5px;
     position: relative;
@@ -142,7 +148,6 @@ div#sproduct-form-builder {
 }
 
 .subscriptionsTableMainBody {
-    background-color: red;
 
     .activeButton {
         span {
@@ -179,6 +184,7 @@ div#sproduct-form-builder {
     outline: 0;
     border: 1px solid gainsboro;
 }
+
 .checkbox-repeater .checkbox-item {
     margin: 14px 10px;
 }
@@ -187,4 +193,51 @@ div#sproduct-form-builder {
     border: 1px solid #cecece !important;
     padding: 4px 14px 4px 30px !important;
     border-radius: 6px !important;
+}
+
+.form-steps .step:nth-child(2n-1) {
+    background-color: #f7f7f7ee;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.form-steps .step:last-child {
+    margin-bottom: 20px;
+}
+
+.tablenav.bottom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.tablenav-pages>span {
+    color: #fff;
+}
+
+.tablenav-pages>a {
+    color: #6d98ba;
+    transition: all .3s linear;
+}
+
+.tablenav-pages>a:hover {
+    color: #195f98;
+}
+
+.tablenav-pages>span,
+.tablenav-pages>a {
+    background-color: #1d2327;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+table.wp-list-table.widefat.fixed.striped {
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #eaeaea;
+
+    thead th {
+        border-bottom: 1px solid #00000000 !important;
+    }
 }
