@@ -67,8 +67,12 @@
 .input-header input:not([type="checkbox"]),
 .step-condition {
     border: 1px solid #cecece !important;
-    padding: 6px 14px 6px 30px !important;
+    padding: 6px 14px 6px 30px;
     border-radius: 6px !important;
+}
+
+.step-condition {
+    padding: 6px 14px 6px 30px !important;
 }
 
 .input-header input[type="checkbox"] {
@@ -142,9 +146,14 @@ div#sproduct-form-builder {
                 align-items: center;
                 margin: 16px 0;
                 gap: 10px;
+                flex-wrap: wrap;
             }
         }
     }
+}
+
+.checkbox-repeater {
+    width: 100%;
 }
 
 .subscriptionsTableMainBody {
@@ -240,4 +249,17 @@ table.wp-list-table.widefat.fixed.striped {
     thead th {
         border-bottom: 1px solid #00000000 !important;
     }
+}
+
+input.condition-input {
+    width: 85px;
+    padding: 6px !important;
+}
+
+.uniqueid-checkbox {
+    display: inline-block;
+    border: 1px solid #cecece !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    background-color: white;
 }

@@ -6,7 +6,9 @@ jQuery(document).ready(function ($) {
     let formData = window.sproductFormData && Array.isArray(window.sproductFormData)
         ? window.sproductFormData
         : [];
+
     renderForm();
+
     addStepBtn.on('click', function () {
         const newStep = {
             name: 'New Step',
@@ -17,7 +19,7 @@ jQuery(document).ready(function ($) {
         renderForm();
         saveForm();
     });
-    // Render Form Steps and Inputs
+
     function renderForm() {
         formBuilder.html('');
         formData.forEach((step, stepIndex) => {
@@ -28,16 +30,14 @@ jQuery(document).ready(function ($) {
                         <h3 contenteditable="true" class="step-title">${step.name}</h3>
                     </div>
                     <select class="step-condition">
-                        <option value="">No Condition</option>
-                        <option value="checkbox">Show if Checkbox</option>
-                        <option value="select">Show if Select</option>
+                        <option value="">بدون شرط</option>
+                        <option value="checkbox">شرط چک باکس</option>
                     </select>
                     <button type="button" class="add-input-btn button">افزودن +</button>
                     <div class="inputs" data-step-index="${stepIndex}"></div>
                 </div>
             `);
 
-            // Step Events
             stepDiv.find('.step-condition').val(step.condition || '').on('change', function () {
                 formData[stepIndex].condition = $(this).val();
                 saveForm();
@@ -51,7 +51,7 @@ jQuery(document).ready(function ($) {
             stepDiv.find('.add-input-btn').on('click', function () {
                 const newInput = {
                     label: 'New Input',
-                    type: 'text',
+                    type: formData[stepIndex].condition === '' ? 'text' : formData[stepIndex].condition,
                     required: false,
                     options: [],
                     id: `datepicker${Date.now()}` // Generate a unique ID based on timestamp
@@ -74,15 +74,13 @@ jQuery(document).ready(function ($) {
                     saveForm();
                 }
             });
+
             formBuilder.append(stepDiv);
             renderInputs(stepDiv.find('.inputs'), step.inputs, stepIndex);
         });
-        saveForm();
         makeSortable();
     }
 
-    
-    // Render Individual Inputs
     function renderInputs(container, inputs, stepIndex) {
         container.html('');
         inputs.forEach((input, inputIndex) => {
@@ -108,28 +106,8 @@ jQuery(document).ready(function ($) {
                         <button type="button" class="delete-input-btn button button-small button-danger">X</button>
                     </div>
                 </div>
+            </div>
             `);
-            // Apply .is_required class dynamically
-            if (input.required) {
-                inputDiv.addClass('is_required');
-            }
-            // Update label and type in formData on input
-            inputDiv.find('label').on('input', function () {
-                formData[stepIndex].inputs[inputIndex].label = $(this).text();
-                saveForm();
-            });   
-            // Update placeholder
-            inputDiv.find('.placeholder-input').on('input', function () {
-                formData[stepIndex].inputs[inputIndex].placeholder = $(this).val();
-                saveForm();
-            });     
-            inputDiv.find('.delete-input-btn').on('click', function () {
-                if (confirm('Delete this input?')) {
-                    formData[stepIndex].inputs.splice(inputIndex, 1);
-                    renderInputs(container, formData[stepIndex].inputs, stepIndex);
-                    saveForm();
-                }
-            });      
 
             // Helper function to render options as checkboxes or radio buttons
             function renderOptions(container, type, options) {
@@ -340,71 +318,85 @@ jQuery(document).ready(function ($) {
                     inputDiv.append(repeater);
                 }
                 if (newType === 'checkbox_group') {
-                    const repeater = $('<div class="checkbox-repeater"></div>');
-                    
-                    // Add Option Button
-                    const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
-                    addOptionBtn.on('click', function () {
-                        const newOptionDiv = $(`
-                            <div class="checkbox-item">
-                                <input type="text" value="" class="checkbox-option" placeholder="Option ${repeater.find('.checkbox-item').length + 1}">
-                                <button type="button" class="delete-option">X</button>
-                            </div>
-                        `);
-                        repeater.append(newOptionDiv);
-
-                        // Save changes immediately
-                        const options = [];
-                        repeater.find('.checkbox-option').each(function () {
-                            const value = $(this).val().trim();
-                            if (value !== '') {
-                                options.push(value);
-                            }
-                        });
-                        formData[stepIndex].inputs[inputIndex].options = options;
-
-                        saveForm();
-                    });
-
-                    repeater.append(addOptionBtn);
-                    inputDiv.append(repeater);
-
-
-                    repeater.on('input', '.checkbox-option', function () {
-                        const options = [];
-                        repeater.find('.checkbox-option').each(function () {
-                            options.push($(this).val().trim());
-                        });
-                        $(this).closest('.checkbox-repeater').find('.checkbox-option').each(function () {
-                            options.push($(this).val().trim());
-                        });
-                        formData[stepIndex].inputs[inputIndex].options = options;
-                        saveForm();
-                    });
-                    // Restore saved options during re-render
-                    const options = formData[stepIndex].inputs[inputIndex].options || [];
-                    options.forEach((option, index) => {
-                        const optionDiv = $(`
-                            <div class="checkbox-item">
-                                <input type="text" value="${option}" class="checkbox-option" placeholder="Option ${index + 1}">
-                                <button type="button" class="delete-option">X</button>
-                            </div>
-                        `);
-                        repeater.append(optionDiv);
-                    });
-                    // Append the repeater below the input
-                    inputDiv.append(repeater);
+                    renderCheckboxRepeater(inputDiv.find('.checkbox-repeater'), input.options, stepIndex, inputIndex);
+                } else {
+                    input.options = [];
+                    inputDiv.find('.checkbox-repeater').html('');
                 }
                 saveForm();
             });
+
+            inputDiv.find('.condition-input').on('input', function () {
+                input.condition = $(this).val();
+                saveForm();
+            });
+
+            inputDiv.find('.placeholder-input').on('input', function () {
+                input.placeholder = $(this).val();
+                saveForm();
+            });
+
+            inputDiv.find('.required-checkbox').on('change', function () {
+                input.required = $(this).is(':checked');
+                saveForm();
+            });
+
+            if (input.type === 'checkbox_group') {
+                renderCheckboxRepeater(inputDiv.find('.checkbox-repeater'), input.options, stepIndex, inputIndex);
+            }
+
+            inputDiv.find('.delete-input-btn').on('click', function () {
+                if (confirm('Delete this input?')) {
+                    inputs.splice(inputIndex, 1);
+                    renderInputs(container, inputs, stepIndex);
+                    saveForm();
+                }
+            });
+
             container.append(inputDiv);
-        });   
+        });
     }
 
+    function renderCheckboxRepeater(container, options, stepIndex, inputIndex) {
+        container.html('');
+        options.forEach((option, index) => {
+            const optionDiv = $(`
+                <div class="checkbox-item">
+                    <input type="text" value="${option.value}" class="checkbox-option" placeholder="Option ${index + 1}">
+                    <span class="checkbox-id uniqueid-checkbox">${option.id}</span>
+                    <button type="button" class="delete-option">X</button>
+                </div>
+            `);
 
+            optionDiv.find('.checkbox-option').on('input', function () {
+                options[index].value = $(this).val().trim();
+                saveForm();
+            });
 
+            optionDiv.find('.delete-option').on('click', function () {
+                options.splice(index, 1);
+                renderCheckboxRepeater(container, options, stepIndex, inputIndex);
+                saveForm();
+            });
 
-    // Make Steps and Inputs Sortable
+            container.append(optionDiv);
+        });
+
+        const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
+        addOptionBtn.on('click', function () {
+            const uniqueId = `ck-${stepIndex}-${inputIndex}-${options.length + 1}`;
+            options.push({ id: uniqueId, value: '' });
+            renderCheckboxRepeater(container, options, stepIndex, inputIndex);
+            saveForm();
+        });
+
+        container.append(addOptionBtn);
+    }
+
+    function saveForm() {
+        hiddenInput.val(JSON.stringify(formData));
+    }
+
     function makeSortable() {
         if (typeof Sortable !== 'undefined') {
             Sortable.create(formBuilder[0], {
@@ -414,19 +406,6 @@ jQuery(document).ready(function ($) {
                     formData.splice(evt.newIndex, 0, item);
                     saveForm();
                 }
-            });
-
-            $('.inputs').each(function () {
-                Sortable.create(this, {
-                    animation: 150,
-                    group: 'inputs',
-                    onEnd: function (evt) {
-                        const stepIndex = $(evt.from).data('step-index');
-                        const item = formData[stepIndex].inputs.splice(evt.oldIndex, 1)[0];
-                        formData[stepIndex].inputs.splice(evt.newIndex, 0, item);
-                        saveForm();
-                    }
-                });
             });
         }
     }
