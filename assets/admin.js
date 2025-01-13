@@ -89,6 +89,7 @@ jQuery(document).ready(function ($) {
             const inputDiv = $(`
                 <div class="input-item" data-input-index="${inputIndex}">
                     <div class="input-header">
+                        <input type="text" class="condition-input" placeholder="#کد شرط" value="${input.condition || ''}" />
                         <label contenteditable="true">${input.label}</label>
                         <select class="input-type">
                             <option value="text" ${input.type === 'text' ? 'selected' : ''}>Text</option>
@@ -117,7 +118,11 @@ jQuery(document).ready(function ($) {
             inputDiv.find('label').on('input', function () {
                 formData[stepIndex].inputs[inputIndex].label = $(this).text();
                 saveForm();
-            });   
+            });
+            inputDiv.find('.condition-input').on('input', function () {
+                formData[stepIndex].inputs[inputIndex].condition = $(this).text();
+                saveForm();
+            });
             // Update placeholder
             inputDiv.find('.placeholder-input').on('input', function () {
                 formData[stepIndex].inputs[inputIndex].placeholder = $(this).val();
@@ -130,7 +135,6 @@ jQuery(document).ready(function ($) {
                     saveForm();
                 }
             });      
-
             // Helper function to render options as checkboxes or radio buttons
             function renderOptions(container, type, options) {
                 container.find('.checkbox-item').remove(); // Clear existing options

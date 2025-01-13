@@ -9,6 +9,7 @@ function sproduct_display_form_on_single($content)
             return $content . '<p>No form data found.</p>';
         }
         $form_data = json_decode($form_data, true);
+
         $plans = get_post_meta($post->ID, '_sproduct_plans', true);
         $plans = maybe_unserialize($plans);  // Ensure proper decoding
         ob_start();
@@ -27,12 +28,12 @@ function sproduct_display_form_on_single($content)
                                     <div class="checkbox-group">
                                         <?php foreach ($input['options'] as $option_index => $option): ?>
                                             <div>
-                                            <label>
-                                                <input type="checkbox" 
-                                                    name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>[]" 
-                                                    value="<?php echo esc_attr($option); ?>">
-                                                <?php echo esc_html($option); ?>
-                                            </label>
+                                                <label>
+                                                    <input type="checkbox"
+                                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>[]"
+                                                        value="<?php echo esc_attr($option); ?> ">
+                                                        <?php echo esc_html($option); ?>
+                                                </label>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
