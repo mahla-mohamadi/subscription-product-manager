@@ -1,4 +1,74 @@
+
 jQuery(document).ready(function ($) {
+    // Initialize Persian Date Picker for all date inputs
+    $('.datepicker-input').each(function () {
+        const uniqueId = $(this).attr("id"); // Get the ID of the input
+        if (uniqueId) {
+            $("#" + uniqueId).persianDatepicker({
+                "inline": false,
+                "format": "YYYY/MM/DD",
+                "viewMode": "year",
+                "initialValue": false,
+                "minDate": null,
+                "maxDate": null,
+                "autoClose": false,
+                "position": "auto",
+                "altFormat": "YYYY/MM/DD",
+                // "altField": `#alt-${inputId}`, // Create a corresponding alt field if needed
+                "onlyTimePicker": false,
+                "onlySelectOnDate": false,
+                "calendarType": "persian",
+                "inputDelay": 800,
+                "observer": false,
+                "calendar": {
+                    "persian": {
+                        "locale": "fa",
+                        "showHint": true,
+                        "leapYearMode": "algorithmic"
+                    },
+                    "gregorian": {
+                        "locale": "en",
+                        "showHint": false
+                    }
+                },
+                "navigator": {
+                    "enabled": true,
+                    "scroll": {
+                        "enabled": true
+                    },
+                    "text": {
+                        "btnNextText": ">",
+                        "btnPrevText": "<"
+                    }
+                },
+                "toolbox": {
+                    "enabled": true,
+                    "calendarSwitch": {
+                        "enabled": false,
+                        "format": "MMMM"
+                    },
+                    "todayButton": {
+                        "enabled": true,
+                        "text": {
+                            "fa": "امروز",
+                            "en": "Today"
+                        }
+                    },
+                    "submitButton": {
+                        "enabled": true,
+                        "text": {
+                            "fa": "تایید",
+                            "en": "Submit"
+                        }
+                    },
+                    "text": {
+                        "btnToday": "امروز"
+                    }
+                },
+                "responsive": true
+            });
+        }
+    });
     const steps = $('.sproduct-step'),
         nextBtn = $('#next-btn'),
         prevBtn = $('#prev-btn'),

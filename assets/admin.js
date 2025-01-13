@@ -47,14 +47,21 @@ jQuery(document).ready(function ($) {
                 formData[stepIndex].name = $(this).text();
                 saveForm();
             });
-
+            let datePickerCounter = 1; // Counter for datepicker inputs
             stepDiv.find('.add-input-btn').on('click', function () {
                 const newInput = {
                     label: 'New Input',
                     type: 'text',
                     required: false,
-                    options: []
+                    options: [],
+                    id: `datepicker${Date.now()}` // Generate a unique ID based on timestamp
                 };
+                // Check if the new input is a date
+                const inputType = $(this).siblings('.input-type').val();
+                if (inputType === 'date') {
+                    newInput.type = 'date';
+                    newInput.id = `datepicker${datePickerCounter++}`; // Generate unique ID
+                }
                 formData[stepIndex].inputs.push(newInput);
                 renderForm();
                 saveForm();
@@ -92,6 +99,8 @@ jQuery(document).ready(function ($) {
                             <option value="mobile" ${input.type === 'mobile' ? 'selected' : ''}>Mobile Number</option>
                             <option value="telephone" ${input.type === 'telephone' ? 'selected' : ''}>Telephone</option>
                             <option value="checkbox_group" ${input.type === 'checkbox_group' ? 'selected' : ''}>Checkbox Group</option>
+                            <option value="radio_group" ${input.type === 'radio_group' ? 'selected' : ''}>Radio Group</option>
+                            <option value="date" ${input.type === 'date' ? 'selected' : ''}>Date</option>
                         </select>
                         <!-- Placeholder Field -->
                         <input type="text" class="placeholder-input" placeholder="Placeholder text" value="${input.placeholder || ''}" />    
@@ -198,6 +207,58 @@ jQuery(document).ready(function ($) {
                 repeater.append(addOptionBtn);
                 inputDiv.append(repeater);
             }
+            if (input.type === 'radio_group') {
+                const repeater = $('<div class="radio-repeater"></div>');
+            
+                // Add Option Button
+                const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
+                addOptionBtn.on('click', function () {
+                    const newIndex = repeater.find('.radio-item').length + 1;
+                    const newOption = $(`
+                        <div class="radio-item">
+                            <input type="radio" disabled>
+                            <input type="text" value="" class="radio-option" placeholder="Option ${newIndex}">
+                            <button type="button" class="delete-option">X</button>
+                        </div>
+                    `);
+                    repeater.append(newOption);
+                    saveOptions(repeater, stepIndex, inputIndex);
+                });
+            
+                // Delete Option Event
+                repeater.on('click', '.delete-option', function () {
+                    $(this).closest('.radio-item').remove();
+                    saveOptions(repeater, stepIndex, inputIndex);
+                });
+            
+                // Restore saved options
+                if (input.options && input.options.length > 0) {
+                    input.options.forEach((option, index) => {
+                        const optionDiv = $(`
+                            <div class="radio-item">
+                                <input type="radio" disabled>
+                                <input type="text" value="${option}" class="radio-option" placeholder="Option ${index + 1}">
+                                <button type="button" class="delete-option">X</button>
+                            </div>
+                        `);
+                        repeater.append(optionDiv);
+                    });
+                }
+            
+                // Save Options on Input
+                repeater.on('input', '.radio-option', function () {
+                    saveOptions(repeater, stepIndex, inputIndex);
+                });
+            
+                repeater.append(addOptionBtn);
+                inputDiv.append(repeater);
+            }
+            if (input.type === 'date') {
+                inputDiv.append(`
+                    <input type="text" id="${input.id}" class="datepicker-input" placeholder="Select a date" />
+                `);
+            }
+            
             // Handle required checkbox
             inputDiv.find('.required-checkbox').on('change', function () {
                 const isChecked = $(this).is(':checked');
@@ -212,8 +273,72 @@ jQuery(document).ready(function ($) {
             inputDiv.find('.input-type').on('change', function () {
                 const newType = $(this).val();
                 formData[stepIndex].inputs[inputIndex].type = $(this).val();
+
+                // Clear dynamic fields when type changes
+                inputDiv.find('.dynamic-fields').remove();
+
                 // Remove any existing repeater to avoid duplicates
+                inputDiv.find('.radio-repeater').remove();
                 inputDiv.find('.checkbox-repeater').remove();
+                if (newType === 'radio_group') {
+                    const repeater = $('<div class="radio-repeater"></div>');
+            
+                    // Add Option Button
+                    const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
+                    addOptionBtn.on('click', function () {
+                        const newOptionDiv = $(`
+                            <div class="radio-item">
+                                <input type="radio" disabled>
+                                <input type="text" value="" class="radio-option" placeholder="Option ${repeater.find('.radio-item').length + 1}">
+                                <button type="button" class="delete-option">X</button>
+                            </div>
+                        `);
+                        repeater.append(newOptionDiv);
+            
+                        // Save options immediately
+                        const options = [];
+                        repeater.find('.radio-option').each(function () {
+                            const value = $(this).val().trim();
+                            if (value !== '') {
+                                options.push(value);
+                            }
+                        });
+                        formData[stepIndex].inputs[inputIndex].options = options;
+                        saveForm();
+                    });
+            
+                    repeater.append(addOptionBtn);
+            
+                    // Delete Option Event
+                    repeater.on('click', '.delete-option', function () {
+                        $(this).closest('.radio-item').remove();
+                        const options = [];
+                        repeater.find('.radio-option').each(function () {
+                            const value = $(this).val().trim();
+                            if (value !== '') {
+                                options.push(value);
+                            }
+                        });
+                        formData[stepIndex].inputs[inputIndex].options = options;
+                        saveForm();
+                    });
+            
+                    // Input Event to Save Options
+                    repeater.on('input', '.radio-option', function () {
+                        const options = [];
+                        repeater.find('.radio-option').each(function () {
+                            const value = $(this).val().trim();
+                            if (value !== '') {
+                                options.push(value);
+                            }
+                        });
+                        formData[stepIndex].inputs[inputIndex].options = options;
+                        saveForm();
+                    });
+            
+                    // Append the repeater to the input container
+                    inputDiv.append(repeater);
+                }
                 if (newType === 'checkbox_group') {
                     const repeater = $('<div class="checkbox-repeater"></div>');
                     
@@ -322,6 +447,20 @@ jQuery(document).ready(function ($) {
                         }
                     });
                     formData[stepIndex].inputs[inputIndex].options = options; // Save cleaned options
+                }
+                if (inputType === 'radio_group') {
+                    const options = [];
+                    $(this).find('.radio-option').each(function () {
+                        const value = $(this).val().trim();
+                        if (value !== '') { // Avoid saving empty options
+                            options.push(value);
+                        }
+                    });
+                    formData[stepIndex].inputs[inputIndex].options = options;
+                }
+                // Ensure IDs for date inputs are not lost or empty
+                if (inputType === 'date' && !formData[stepIndex].inputs[inputIndex].id) {
+                    formData[stepIndex].inputs[inputIndex].id = `datepicker${Date.now()}`;
                 }
             });
         });

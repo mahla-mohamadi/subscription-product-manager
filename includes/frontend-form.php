@@ -36,8 +36,20 @@ function sproduct_display_form_on_single($content) {
                                         <?php endforeach; ?>
                                     </div>
                                 <?php endif; ?>
-
-
+                                <?php if ($input['type'] === 'radio_group') : ?>
+                                    <div class="radio-group">
+                                        <?php foreach ($input['options'] as $option_index => $option) : ?>
+                                            <div>
+                                                <label>
+                                                    <input type="radio" 
+                                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
+                                                        value="<?php echo esc_attr($option); ?>">
+                                                    <?php echo esc_html($option); ?>
+                                                </label>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
                                 <?php if ($input['type'] === 'text') : ?>
                                     <input type="text" 
                                         name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
@@ -47,7 +59,13 @@ function sproduct_display_form_on_single($content) {
                                     <input type="nationalcode" 
                                         name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
                                         placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
-
+                                <?php elseif ($input['type'] === 'date') : ?>
+                                    <input 
+                                        type="text" 
+                                        id="<?php echo esc_attr($input['id']); ?>" 
+                                        class="datepicker-input" 
+                                        placeholder="<?php echo esc_attr($input['placeholder'] ?? 'Select a date'); ?>" 
+                                    />
                                 <?php elseif ($input['type'] === 'mobile') : ?>
                                     <input type="tel" 
                                         name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
@@ -107,7 +125,14 @@ add_filter('the_content', 'sproduct_display_form_on_single');
 function sproduct_enqueue_frontend_assets() {
     if (is_singular('sproduct')) {
         wp_enqueue_style('sproduct-frontend-css', SPRODUCT_URL . 'assets/frontend.css');
+
+        wp_enqueue_style('persian-datepicker', SPRODUCT_URL . 'assets/persian-datepicker.css');
+        wp_enqueue_style('persian-datepicker-min', SPRODUCT_URL . 'assets/persian-datepicker.min.css');
+
         wp_enqueue_script('sproduct-frontend-js', SPRODUCT_URL . 'assets/frontend.js', ['jquery'], null, true);
+
+        wp_enqueue_script('persian-date', SPRODUCT_URL . 'assets/persian-date.min.js', ['jquery'], null, true);
+        wp_enqueue_script('persian-datepicker', SPRODUCT_URL . 'assets/persian-datepicker.min.js', ['jquery'], null, true);
         
         // Pass AJAX URL and nonce to JavaScript
         wp_localize_script('sproduct-frontend-js', 'sproductAjax', [

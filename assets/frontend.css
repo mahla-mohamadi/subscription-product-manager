@@ -214,3 +214,14 @@ main#primary {
     font-size: 13px;
     color: #d20808;
 }
+.radio-group {
+    margin: 10px 0;
+}
+.radio-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+.radio-item input[type="radio"] {
+    margin-right: 10px;
+}
