@@ -1,13 +1,26 @@
 <?php
-function create_hidden_virtual_product()
-{
+function convert_to_jalali($gregorian_date) {
+    require_once SPRODUCT_PATH . 'lib/jalali-3.4.2/src/Jalalian.php';
+    if (!$gregorian_date) {
+        return 'Invalid date';
+    }
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $gregorian_date)) {
+        return 'Invalid date format. Expected format: Y-m-d';
+    }
+    if (!class_exists('Morilog\Jalali\Jalalian')) {
+        return 'Jalalian class not found';
+    }
+    $jalali_date = Morilog\Jalali\Jalalian::forge($gregorian_date)->format('Y/m/d');
+    return $jalali_date;
+}
+function create_hidden_virtual_product(){
     if (class_exists('WC_Product')) {
         if (!wc_get_product_id_by_sku('s_prod_virtual')) {
             $product = new WC_Product();
             $product->set_name('اشتراک');
             $product->set_status('publish');
             $product->set_catalog_visibility('hidden');
-            $product->set_virtual(true);  // Set as virtual product
+            $product->set_virtual(true);
             $product->set_price(1);
             $product->set_regular_price(1);
             $product->set_sku('s_prod_virtual');
@@ -17,9 +30,7 @@ function create_hidden_virtual_product()
 }
 add_action('admin_init', 'create_hidden_virtual_product');
 
-
-function register_subscriptions_menu()
-{
+function register_subscriptions_menu(){
     add_menu_page(
         'اشتراک ها', // Page title
         'اشتراک ها', // Menu title
@@ -29,27 +40,26 @@ function register_subscriptions_menu()
         'dashicons-list-view', // Icon
         25 // Position
     );
+    add_submenu_page(
+        null, // Parent slug (null hides this submenu from the menu)
+        'ویرایش اشتراک', // Page title
+        'ویرایش اشتراک', // Menu title (not visible)
+        'manage_options', // Capability
+        'edit-subscription', // Menu slug
+        'edit_subscription_page_callback' // Callback function
+    );
 }
 add_action('admin_menu', 'register_subscriptions_menu');
 
-function subscriptions_page_callback()
-{
+function subscriptions_page_callback(){
     global $wpdb;
-
     $table_name = $wpdb->prefix . 's_subscriptions';
-
-    // Handle pagination
     $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
     $per_page = 1; // Number of rows per page
     $offset = ($paged - 1) * $per_page;
-
-    // Handle sorting
     $orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'id';
     $order = isset($_GET['order']) && strtolower($_GET['order']) === 'asc' ? 'ASC' : 'DESC';
-
-    // Fetch data
     $total_items = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
-
     $results = $wpdb->get_results(
         $wpdb->prepare(
             "SELECT * FROM $table_name ORDER BY $orderby $order LIMIT %d OFFSET %d",
@@ -57,58 +67,47 @@ function subscriptions_page_callback()
             $offset
         )
     );
-
-    // Calculate pagination
     $total_pages = ceil($total_items / $per_page);
-
-    // Display the table
     echo '<div class="wrap">';
     echo '<h1>لیست اشتراک ها</h1>';
     echo '<table class="wp-list-table widefat fixed striped">';
     echo '<thead>';
     echo '<tr>';
-
-    // Define sortable columns and display the sorting icons
     $columns = [
-        'user_id' => 'شناسه کاربر',
-        'sproduct_id' => 'شناسه محصول',
+        'user_id' => 'کاربر',
+        'sproduct_id' => 'اشتراک',
         'start_date' => 'شروع اشتراک',
         'end_date' => 'پایان اشتراک',
         'amount' => 'هزینه',
         'plan' => 'پلن',
-        'status' => 'وضعیت'
+        'status' => 'وضعیت',
+        'edit' => 'ویرایش'
     ];
-
     foreach ($columns as $column => $label) {
-        // Determine the opposite order for sorting
         $sort_order = ($orderby === $column && $order === 'ASC') ? 'DESC' : 'ASC';
-        // Set the sorting icon based on the current sorting order
         $icon = '';
         if ($orderby === $column) {
-            // If current order is asc, show the down arrow, otherwise show the up arrow
             $icon = ($order === 'asc')
                 ? '<span class="dashicons dashicons-arrow-up-alt2"></span>'
                 : '<span class="dashicons dashicons-arrow-down-alt2"></span>';
         }
-
-        // Create URL with sorting parameters
         $url = add_query_arg([
             'page' => 'subscriptions',
             'orderby' => $column,
             'order' => $sort_order
         ]);
-
         echo '<th scope="col"><a href="' . esc_url($url) . '">' . $label . ' ' . $icon . '</a></th>';
     }
-
     echo '</tr>';
     echo '</thead>';
     echo '<tbody class="subscriptionsTableMainBody">';
     if (!empty($results)) {
         foreach ($results as $row) {
+            $editURL = admin_url('admin.php?page=edit-subscription&subscription_id=' . $row->id);
+            $fullUserName = get_user_meta( $row->user_id, 'first_name', true ).' '.get_user_meta( $row->user_id, 'last_name', true );
             echo '<tr>';
-            echo '<td>' . esc_html($row->user_id) . '</td>';
-            echo '<td>' . esc_html($row->sproduct_id) . '</td>';
+            echo '<td>' . esc_html($fullUserName) . '</td>';
+            echo '<td>' . esc_html($row->sproduct_name) . '</td>';
             echo '<td>' . esc_html($row->start_date) . '</td>';
             echo '<td>' . esc_html($row->end_date) . '</td>';
             echo '<td>' . esc_html($row->amount) . ' تومان</td>';
@@ -118,6 +117,7 @@ function subscriptions_page_callback()
             } else {
                 echo '<td class="DeactiveButton"><span>غیر فعال</span></td>';
             }
+            echo '<td><a href="'.esc_url($editURL).'">' . esc_html($row->edit) . '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><g stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.28 6.4-9.54 9.54c-.95.95-3.77 1.39-4.4.76s-.2-3.45.75-4.4l9.55-9.55a2.58 2.58 0 1 1 3.64 3.65"/><path d="M11 4H6a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h11c2.21 0 3-1.8 3-4v-5"/></g></svg></a></td>';
             echo '</tr>';
         }
     } else {
@@ -125,8 +125,6 @@ function subscriptions_page_callback()
     }
     echo '</tbody>';
     echo '</table>';
-
-    // Display pagination
     echo '<div class="tablenav bottom">';
     echo '<div class="tablenav-pages">';
     if ($total_pages > 1) {
@@ -144,10 +142,87 @@ function subscriptions_page_callback()
     echo '</div>';
     echo '</div>';
 }
+function edit_subscription_page_callback(){
+    global $wpdb;
 
+    if (isset($_GET['subscription_id'])) {
+        $subscription_id = intval($_GET['subscription_id']); // Sanitize the ID
 
+        // Query the wp_s_subscription table
+        $table_name = $wpdb->prefix . 's_subscriptions'; // Adjust table name with prefix
+        $subscription = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT *, DATEDIFF(end_date, CURDATE()) AS remaining_days
+                FROM $table_name
+                WHERE id = %d
+                AND end_date >= CURDATE()",
+                $subscription_id
+            )
+        );
+        // $user_info = $wpdb->get_results(
+        //     $wpdb->prepare(
+        //         "SELECT meta_key, meta_value 
+        //          FROM wp_usermeta 
+        //          WHERE user_id = %d AND meta_key IN ('first_name', 'last_name')",
+        //         $subscription->user_id
+        //     ),
+        //     OBJECT_K
+        // );
+        $fullUserName = get_user_meta( $subscription->user_id, 'first_name', true ).' '.get_user_meta( $subscription->user_id, 'last_name', true );
+        if ($subscription) {
+            $jalali_start_date = convert_to_jalali($subscription->start_date);
+            $jalali_end_date = convert_to_jalali($subscription->end_date);
+            $sproductName = get_the_title($subscription->sproduct_id);
+            echo "<h1>ویرایش اشتراک</h1>";
+            echo "<p>اشتراک {$subscription->plan} {$fullUserName} ({$subscription->remaining_days} روز باقی مانده)</p>";
+            echo "<p>نام سرویس: {$sproductName}</p>";
+            echo "<p>تاریخ شروع: {$jalali_start_date}</p>";
+            echo "<p>تاریخ پایان: {$jalali_end_date}</p>";
+            echo "<p>وضعیت: {$subscription->status}</p>";
+            echo "<p>تاریخ ایجاد: {$subscription->created_at}</p>";
 
+            // Add a form for editing if needed
+            echo '<form method="post">';
+            echo '<label for="name">نام:</label>';
+            echo '<input type="text" id="name" name="name" value="' . esc_attr($subscription->name) . '">';
+            echo '<br>';
+            echo '<label for="status">وضعیت:</label>';
+            echo '<input type="text" id="status" name="status" value="' . esc_attr($subscription->status) . '">';
+            echo '<br>';
+            echo '<input type="submit" name="update_subscription" value="بروزرسانی">';
+            echo '</form>';
 
+            // Handle form submission
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_subscription'])) {
+                $new_name = sanitize_text_field($_POST['name']);
+                $new_status = sanitize_text_field($_POST['status']);
+
+                $update_result = $wpdb->update(
+                    $table_name,
+                    [
+                        'name' => $new_name,
+                        'status' => $new_status
+                    ],
+                    ['id' => $subscription_id],
+                    ['%s', '%s'], // Data format for the fields being updated
+                    ['%d']        // Data format for the WHERE clause
+                );
+
+                if ($update_result !== false) {
+                    echo '<p style="color:green;">اشتراک با موفقیت بروزرسانی شد.</p>';
+                } else {
+                    echo '<p style="color:red;">خطایی در بروزرسانی رخ داد.</p>';
+                }
+            }
+        } else {
+            echo "<h1>خطا</h1>";
+            echo "<p>اشتراک با این ID یافت نشد.</p>";
+        }
+    } else {
+        echo "<h1>خطا</h1>";
+        echo "<p>ID اشتراک مشخص نشده است.</p>";
+    }
+}
 
 
 function sproduct_add_custom_columns($columns)

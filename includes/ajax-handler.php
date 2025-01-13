@@ -129,18 +129,16 @@ function sproduct_create_subscription_on_order($order_id) {
         $wpdb->insert(
             "{$wpdb->prefix}s_subscriptions",
             array(
-                'sproduct_id' => $item->get_product_id(),  // Reference to product ID
+                'sproduct_id' => $item->get_product_id(),
+                'sproduct_name' => $spn,
                 'user_id'     => $order->get_user_id(),
                 'start_date'  => $start_date,
                 'end_date'    => $end_date,
                 'plan'        => $pn,
                 'amount'      => $price,
-                'currency'    => $order->get_currency(),
                 'status'      => 'active',
-                'payment_method' => $order->get_payment_method(),
-                'created_at'  => current_time('mysql')
             ),
-            array('%d', '%d', '%s', '%s', '%s', '%f', '%s', '%s', '%s')
+            array('%d', '%s' , '%d', '%s', '%s', '%s', '%d', '%s')
         );
         $subscription_id = $wpdb->insert_id;
         if ($subscription_id) {

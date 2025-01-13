@@ -3,8 +3,8 @@
 function sproduct_custom_post_type() {
     register_post_type('sproduct', [
         'labels' => [
-            'name' => 'Subscription Products',
-            'singular_name' => 'Subscription Product',
+            'name' => 'محصولات اشتراکی',
+            'singular_name' => 'محصول اشتراکی',
         ],
         'public' => true,
         'menu_icon' => 'dashicons-cart',
