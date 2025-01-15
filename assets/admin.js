@@ -83,6 +83,8 @@ jQuery(document).ready(function ($) {
         saveForm();
         makeSortable();
     }
+
+
     // Render Individual Inputs
     function renderInputs(container, inputs, stepIndex) {
         container.html('');
@@ -121,39 +123,40 @@ jQuery(document).ready(function ($) {
                 saveForm();
             });
             inputDiv.find('.condition-input').on('input', function () {
-                formData[stepIndex].inputs[inputIndex].condition = $(this).text();
+                formData[stepIndex].inputs[inputIndex].condition = $(this).val();
                 saveForm();
             });
             // Update placeholder
             inputDiv.find('.placeholder-input').on('input', function () {
                 formData[stepIndex].inputs[inputIndex].placeholder = $(this).val();
                 saveForm();
-            });     
+            });
             inputDiv.find('.delete-input-btn').on('click', function () {
                 if (confirm('Delete this input?')) {
                     formData[stepIndex].inputs.splice(inputIndex, 1);
                     renderInputs(container, formData[stepIndex].inputs, stepIndex);
                     saveForm();
                 }
-            });      
+            });
             // Helper function to render options as checkboxes or radio buttons
             function renderOptions(container, type, options) {
                 container.find('.checkbox-item').remove(); // Clear existing options
-            
+
                 // Ensure valid options are rendered
                 options.forEach((option, index) => {
                     const optionDiv = $(`
                         <div class="checkbox-item">
                             <input type="${type}" disabled>
                             <input type="text" value="${option}" class="checkbox-option" placeholder="Option ${index + 1}">
+                            
                             <button type="button" class="delete-option">X</button>
                         </div>
                     `);
-            
+
                     // Handle delete button for this option
                     optionDiv.find('.delete-option').on('click', function () {
                         optionDiv.remove();
-            
+
                         // Update formData immediately when an option is deleted
                         const stepIndex = container.closest('.step').data('step-index');
                         const inputIndex = container.closest('.input-item').data('input-index');
@@ -161,14 +164,14 @@ jQuery(document).ready(function ($) {
                         container.find('.checkbox-option').each(function () {
                             const value = $(this).val().trim();
                             if (value !== '') {
-                                updatedOptions.push(value); // Avoid empty options
+                                updatedOptions.push(value);
                             }
                         });
                         formData[stepIndex].inputs[inputIndex].options = updatedOptions;
-            
+
                         saveForm();
                     });
-            
+
                     container.append(optionDiv);
                 });
             }
@@ -179,12 +182,23 @@ jQuery(document).ready(function ($) {
                 const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
                 addOptionBtn.on('click', function () {
                     const newIndex = repeater.find('.checkbox-item').length + 1;
+                    let options = [];
+                    let countCheckBox = 0;
+                    const uniqueId =`ck-${stepIndex}-${inputIndex}-${options.length + 1}`;
+                    options.push({ id: uniqueId, value: '' });
                     const newOption = $(`
                         <div class="checkbox-item">
                             <input type="text" value="" class="checkbox-option" placeholder="Option ${newIndex}">
+                            <span class="checkbox-id uniqueid-checkbox">${uniqueId}</span>
                             <button type="button" class="delete-option">X</button>
                         </div>
                     `);
+                    countCheckBox++;
+
+                    // newOption.find('.checkbox-option').on('input', function () {
+                    //     options[index].value = $(this).val().trim();
+                    // });
+
                     repeater.append(newOption);
                     saveOptions(repeater, stepIndex, inputIndex);
                 });
@@ -199,6 +213,7 @@ jQuery(document).ready(function ($) {
                         const optionDiv = $(`
                             <div class="checkbox-item">
                                 <input type="text" value="${option}" class="checkbox-option" placeholder="Option ${index + 1}">
+                                
                                 <button type="button" class="delete-option">X</button>
                             </div>
                         `);
@@ -214,7 +229,7 @@ jQuery(document).ready(function ($) {
             }
             if (input.type === 'radio_group') {
                 const repeater = $('<div class="radio-repeater"></div>');
-            
+
                 // Add Option Button
                 const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
                 addOptionBtn.on('click', function () {
@@ -229,13 +244,13 @@ jQuery(document).ready(function ($) {
                     repeater.append(newOption);
                     saveOptions(repeater, stepIndex, inputIndex);
                 });
-            
+
                 // Delete Option Event
                 repeater.on('click', '.delete-option', function () {
                     $(this).closest('.radio-item').remove();
                     saveOptions(repeater, stepIndex, inputIndex);
                 });
-            
+
                 // Restore saved options
                 if (input.options && input.options.length > 0) {
                     input.options.forEach((option, index) => {
@@ -249,12 +264,12 @@ jQuery(document).ready(function ($) {
                         repeater.append(optionDiv);
                     });
                 }
-            
+
                 // Save Options on Input
                 repeater.on('input', '.radio-option', function () {
                     saveOptions(repeater, stepIndex, inputIndex);
                 });
-            
+
                 repeater.append(addOptionBtn);
                 inputDiv.append(repeater);
             }
@@ -263,7 +278,7 @@ jQuery(document).ready(function ($) {
                     <input type="text" id="${input.id}" class="datepicker-input" placeholder="Select a date" />
                 `);
             }
-            
+
             // Handle required checkbox
             inputDiv.find('.required-checkbox').on('change', function () {
                 const isChecked = $(this).is(':checked');
@@ -287,7 +302,7 @@ jQuery(document).ready(function ($) {
                 inputDiv.find('.checkbox-repeater').remove();
                 if (newType === 'radio_group') {
                     const repeater = $('<div class="radio-repeater"></div>');
-            
+
                     // Add Option Button
                     const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
                     addOptionBtn.on('click', function () {
@@ -299,7 +314,7 @@ jQuery(document).ready(function ($) {
                             </div>
                         `);
                         repeater.append(newOptionDiv);
-            
+
                         // Save options immediately
                         const options = [];
                         repeater.find('.radio-option').each(function () {
@@ -311,9 +326,9 @@ jQuery(document).ready(function ($) {
                         formData[stepIndex].inputs[inputIndex].options = options;
                         saveForm();
                     });
-            
+
                     repeater.append(addOptionBtn);
-            
+
                     // Delete Option Event
                     repeater.on('click', '.delete-option', function () {
                         $(this).closest('.radio-item').remove();
@@ -327,7 +342,7 @@ jQuery(document).ready(function ($) {
                         formData[stepIndex].inputs[inputIndex].options = options;
                         saveForm();
                     });
-            
+
                     // Input Event to Save Options
                     repeater.on('input', '.radio-option', function () {
                         const options = [];
@@ -335,31 +350,37 @@ jQuery(document).ready(function ($) {
                             const value = $(this).val().trim();
                             if (value !== '') {
                                 options.push(value);
+
                             }
                         });
                         formData[stepIndex].inputs[inputIndex].options = options;
                         saveForm();
                     });
-            
+
                     // Append the repeater to the input container
                     inputDiv.append(repeater);
                 }
                 if (newType === 'checkbox_group') {
                     const repeater = $('<div class="checkbox-repeater"></div>');
-                    
+
                     // Add Option Button
                     const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
                     addOptionBtn.on('click', function () {
+                        let options = [];
+                        const uniqueId = `ck-${stepIndex}-${inputIndex}-${options.length + 1}`;
+                        options.push({ id: uniqueId, value: '' });
                         const newOptionDiv = $(`
                             <div class="checkbox-item">
                                 <input type="text" value="" class="checkbox-option" placeholder="Option ${repeater.find('.checkbox-item').length + 1}">
+                                <span class="checkbox-id uniqueid-checkbox">${uniqueId}</span>
                                 <button type="button" class="delete-option">X</button>
                             </div>
                         `);
+
                         repeater.append(newOptionDiv);
 
                         // Save changes immediately
-                        const options = [];
+
                         repeater.find('.checkbox-option').each(function () {
                             const value = $(this).val().trim();
                             if (value !== '') {
@@ -392,6 +413,7 @@ jQuery(document).ready(function ($) {
                         const optionDiv = $(`
                             <div class="checkbox-item">
                                 <input type="text" value="${option}" class="checkbox-option" placeholder="Option ${index + 1}">
+                                
                                 <button type="button" class="delete-option">X</button>
                             </div>
                         `);
@@ -403,7 +425,7 @@ jQuery(document).ready(function ($) {
                 saveForm();
             });
             container.append(inputDiv);
-        });   
+        });
     }
     // Make Steps and Inputs Sortable
     function makeSortable() {
@@ -436,8 +458,8 @@ jQuery(document).ready(function ($) {
             $(this).find('.input-item').each(function (inputIndex) {
                 const inputType = $(this).find('.input-type').val();
                 formData[stepIndex].inputs[inputIndex].type = inputType;
-    
-                if (inputType === 'checkbox_group') {    
+
+                if (inputType === 'checkbox_group') {
                     // Save options for checkbox_group
                     const options = [];
                     $(this).find('.checkbox-option').each(function () {
@@ -467,10 +489,11 @@ jQuery(document).ready(function ($) {
                 }
             });
         });
+
         hiddenInput.val(JSON.stringify(formData)); // Save to hidden input for persistence
     }
     $('form').on('submit', function () {
         saveForm();
     });
-    
+
 });
