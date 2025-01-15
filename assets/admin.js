@@ -11,7 +11,6 @@ jQuery(document).ready(function ($) {
         const newStep = {
             name: 'New Step',
             inputs: [],
-            condition: null
         };
         formData.push(newStep);
         renderForm();
@@ -49,18 +48,22 @@ jQuery(document).ready(function ($) {
             });
             let datePickerCounter = 1; // Counter for datepicker inputs
             stepDiv.find('.add-input-btn').on('click', function () {
+                const stepIndex = $(this).closest('.step').data('step-index'); // Get the step index
+                const inputIndex = formData[stepIndex].inputs.length; // Get the current input index within the step
+
                 const newInput = {
                     label: 'New Input',
                     type: 'text',
                     required: false,
                     options: [],
-                    id: `datepicker${Date.now()}` // Generate a unique ID based on timestamp
+                    id: `datepicker${stepIndex}${inputIndex}` // Generate a unique ID based on timestamp
                 };
+                // Check if the new input is a date
                 // Check if the new input is a date
                 const inputType = $(this).siblings('.input-type').val();
                 if (inputType === 'date') {
                     newInput.type = 'date';
-                    newInput.id = `datepicker${datePickerCounter++}`; // Generate unique ID
+                    newInput.id = `datepicker${stepIndex}${inputIndex}`; // Generate ID specifically for date inputs
                 }
                 formData[stepIndex].inputs.push(newInput);
                 renderForm();
@@ -80,8 +83,6 @@ jQuery(document).ready(function ($) {
         saveForm();
         makeSortable();
     }
-
-    
     // Render Individual Inputs
     function renderInputs(container, inputs, stepIndex) {
         container.html('');
@@ -404,10 +405,6 @@ jQuery(document).ready(function ($) {
             container.append(inputDiv);
         });   
     }
-
-
-
-
     // Make Steps and Inputs Sortable
     function makeSortable() {
         if (typeof Sortable !== 'undefined') {
@@ -434,7 +431,6 @@ jQuery(document).ready(function ($) {
             });
         }
     }
-
     function saveForm() {
         $('.step').each(function (stepIndex) {
             $(this).find('.input-item').each(function (inputIndex) {
@@ -464,11 +460,13 @@ jQuery(document).ready(function ($) {
                 }
                 // Ensure IDs for date inputs are not lost or empty
                 if (inputType === 'date' && !formData[stepIndex].inputs[inputIndex].id) {
-                    formData[stepIndex].inputs[inputIndex].id = `datepicker${Date.now()}`;
+                    const stepIndex = $(this).closest('.step').data('step-index'); // Get the step index
+                    const inputIndex = formData[stepIndex].inputs.length; // Get the current input index within the step
+    
+                    formData[stepIndex].inputs[inputIndex].id = `datepicker${stepIndex}${inputIndex}`;
                 }
             });
         });
-    
         hiddenInput.val(JSON.stringify(formData)); // Save to hidden input for persistence
     }
     $('form').on('submit', function () {

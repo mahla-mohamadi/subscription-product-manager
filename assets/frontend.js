@@ -198,7 +198,6 @@ jQuery(document).ready(function ($) {
         nextBtn.toggle(stepIndex !== steps.length - 1);
         submitBtn.toggle(stepIndex === steps.length - 1);
     }
-
     // form.on('input change', 'input, textarea, select', function () {
     //     const input = $(this);
     //     formData[input.attr('name')] = input.attr('type') === 'checkbox'
@@ -216,7 +215,6 @@ jQuery(document).ready(function ($) {
     //     sessionStorage.setItem('sproductFormData', JSON.stringify(formData));
     //     sessionStorage.setItem('currentStep', currentStep);
     // }
-
     function showError(input, message) {
         clearError(input);
         input.addClass('input-error-border').after(`<div class="input-error" style="color: red; margin-top: 5px;">${message}</div>`);
