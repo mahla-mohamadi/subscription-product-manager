@@ -8,6 +8,13 @@ jQuery(document).ready(function ($) {
                 "inline": false,
                 "format": "YYYY/MM/DD",
                 "viewMode": "year",
+                onSelect: function (unix, formattedDate) {
+                    console.log("Unix Timestamp:", unix); // مقدار یونیکس
+                    console.log("Formatted Date:", formattedDate);
+                    const manualFormattedDate = new persianDate(unix).format("YYYY/MM/DD");
+                    console.log("Manually Formatted Date:", manualFormattedDate);
+                    sessionStorage.setItem(uniqueId, manualFormattedDate);
+                },
                 "initialValue": false,
                 "minDate": null,
                 "maxDate": null,
@@ -119,33 +126,33 @@ jQuery(document).ready(function ($) {
         //     e.preventDefault();
         // } else {
         //     saveStepData();
-        
-            $.ajax({
-                url: sproductAjax.ajaxurl,
-                method: 'POST',
-                dataType: 'json',
-                data: {
-                    action: 'sproduct_submit_form',
-                    submittedFormData: submittedFormData,
-                    postID: postID,
-                    planName: planName,
-                    planPrice: planPrice,
-                    planDuration: planDuration,
-                    requestType: requestType,
-                    submittedFormData: submittedFormData,
-                    nonce: sproductAjax.nonce
-                },
-                success: (res) => {
-                    if(res.data.added===1){
-                        window.location.href = '../../cart';
-                    }
-                },
-                error: (xhr, status, error) => {
-                    console.log(xhr.responseText);
-                    console.log(status, error);
-                    alert('خطا در ارسال فرم.');
+
+        $.ajax({
+            url: sproductAjax.ajaxurl,
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'sproduct_submit_form',
+                submittedFormData: submittedFormData,
+                postID: postID,
+                planName: planName,
+                planPrice: planPrice,
+                planDuration: planDuration,
+                requestType: requestType,
+                submittedFormData: submittedFormData,
+                nonce: sproductAjax.nonce
+            },
+            success: (res) => {
+                if (res.data.added === 1) {
+                    window.location.href = '../../cart';
                 }
-            });
+            },
+            error: (xhr, status, error) => {
+                console.log(xhr.responseText);
+                console.log(status, error);
+                alert('خطا در ارسال فرم.');
+            }
+        });
         // }
     });
     function validateStep(stepIndex) {
@@ -276,27 +283,34 @@ document.querySelectorAll("#sproduct-main-form input, #sproduct-main-form textar
 // بارگذاری مقادیر ذخیره‌شده هنگام بارگذاری صفحه
 window.addEventListener("load", function () {
     document.querySelectorAll("#sproduct-main-form input, #sproduct-main-form textarea").forEach(function (input) {
-        const storedValue = sessionStorage.getItem(input.name);
 
-        if (storedValue) {
-            // اگر فیلد از نوع رادیو باتن است، وضعیت انتخاب شده را بازیابی کنیم
-            if (input.type === "radio") {
-                const selectedRadio = document.querySelector(`input[name="${input.name}"][value="${storedValue}"]`);
-                if (selectedRadio) {
-                    selectedRadio.checked = true;
+        if (input.id.startsWith("datepicker")) {
+            const storedValueDate = sessionStorage.getItem(input.id);
+            if (storedValueDate) {
+                input.value = storedValueDate;
+            }
+        }
+        else {
+            const storedValue = sessionStorage.getItem(input.name);
+            console.log(sessionStorage.key)
+            if (storedValue) {
+                if (input.type === "radio") {
+                    const selectedRadio = document.querySelector(`input[name="${input.name}"][value="${storedValue}"]`);
+                    if (selectedRadio) {
+                        selectedRadio.checked = true;
+                    }
                 }
-            }
-            // اگر فیلد از نوع چک‌باکس است، وضعیت انتخاب شده را بازیابی کنیم
-            else if (input.type === "checkbox") {
-                const selectedValues = storedValue.split(',');
-                const checkboxes = document.querySelectorAll(`input[name="${input.name}"]`);
-                checkboxes.forEach(function (checkbox) {
-                    checkbox.checked = selectedValues.includes(checkbox.value);
-                });
-            }
-            // برای دیگر فیلدها (مثل input text, textarea)، مقدار را به فیلد اختصاص می‌دهیم
-            else {
-                input.value = storedValue;
+                else if (input.type === "checkbox") {
+                    const selectedValues = storedValue.split(',');
+                    const checkboxes = document.querySelectorAll(`input[name="${input.name}"]`);
+                    checkboxes.forEach(function (checkbox) {
+                        checkbox.checked = selectedValues.includes(checkbox.value);
+                    });
+                }
+
+                else {
+                    input.value = storedValue;
+                }
             }
         }
     });

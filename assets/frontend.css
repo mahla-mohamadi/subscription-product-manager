@@ -157,11 +157,16 @@ main#primary {
         border-style: solid !important;
         border-width: 1px !important;
         border-color: rgba(0, 0, 0, 0.2509803922) !important;
-        color: #606266 !important;
-        padding: 11px 15px !important;
+        color: #5d5d5d !important;
         transition: all 0.4s;
-        border-radius: 7px !important;
+        border-radius: 6px !important;
         margin-top: 5px;
+        box-shadow: none;
+        border: 1px solid #c6d0e9 !important;
+        height: 45px;
+        line-height: 25px;
+        outline: 0;
+        padding: 30px !important;
 
         &:focus-visible {
             outline: 1px solid #858585;
@@ -180,15 +185,13 @@ main#primary {
         min-width: 100%;
     }
 
-    label {
+    .sproduct-input label {
         display: block;
         font-size: 14px;
         color: #0a2540;
         font-weight: 600;
         margin: 20px 0px 10px;
     }
-
-
 
 }
 
@@ -214,14 +217,47 @@ main#primary {
     font-size: 13px;
     color: #d20808;
 }
+
 .radio-group {
     margin: 10px 0;
 }
+
 .radio-item {
     display: flex;
     align-items: center;
     margin-bottom: 5px;
 }
+
 .radio-item input[type="radio"] {
     margin-right: 10px;
+}
+
+.productToSproductsDiv {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    margin: 40px 0 20px;
+}
+
+.productToSproductsDiv label {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-direction: column;
+}
+
+.productToSproductsDiv input {
+    height: 16px;
+    width: 16px;
+}
+
+.productToSproductsDivParent {
+    margin: 60px 0 30px;
+}
+
+.productToSproductsDiv img {
+    height: 100px;
+    width: 100px;
+    margin: 20px 0;
 }

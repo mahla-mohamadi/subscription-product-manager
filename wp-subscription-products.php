@@ -21,6 +21,8 @@ require_once SPRODUCT_PATH . 'includes/admin.php';
 require_once SPRODUCT_PATH . 'includes/frontend-form.php';    // Frontend Form Display
 require_once SPRODUCT_PATH . 'includes/ajax-handler.php';     // AJAX Handlers
 require_once SPRODUCT_PATH . 'includes/db.php';               // Database Operations (Optional)
+require_once SPRODUCT_PATH . 'includes/subscription-product.php';            
+require_once SPRODUCT_PATH . 'includes/profile.php';          
 
 // Activation Hook (Create Tables on Activation)
 register_activation_hook(__FILE__, 'sproduct_install');

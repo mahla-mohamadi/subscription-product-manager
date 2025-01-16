@@ -182,7 +182,9 @@ div#sproduct-form-builder {
 }
 
 .checkbox-repeater button.add-option,
-.checkbox-item button.delete-option {
+.checkbox-item button.delete-option,
+.radio-item button.delete-option,
+.radio-repeater button.add-option {
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -194,11 +196,14 @@ div#sproduct-form-builder {
     border: 1px solid gainsboro;
 }
 
-.checkbox-repeater .checkbox-item {
+.checkbox-repeater .checkbox-item , 
+.radio-repeater .radio-item {
     margin: 14px 10px;
 }
 
-.checkbox-repeater .checkbox-item input {
+.checkbox-repeater .checkbox-item input,
+.radio-item input[type=text] ,
+input.datepicker-input {
     border: 1px solid #cecece !important;
     padding: 4px 14px 4px 30px !important;
     border-radius: 6px !important;

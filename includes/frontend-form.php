@@ -19,7 +19,7 @@ function sproduct_display_form_on_single($content)
                 <?php foreach ($form_data as $step_index => $step): ?>
                     <div class="sproduct-step" data-step="<?php echo $step_index; ?>" <?php echo $step_index !== 0 ? 'style="display:none;"' : ''; ?>>
 
-                    <h3><?php echo esc_html($step['name']); ?></h3>
+                        <h3><?php echo esc_html($step['name']); ?></h3>
                         <?php foreach ($step['inputs'] as $input_index => $input): ?>
 
                             <div class="sproduct-input <?php echo $input['required'] ? 'is_required' : ''; ?>">
@@ -32,19 +32,19 @@ function sproduct_display_form_on_single($content)
                                                     <input type="checkbox"
                                                         name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>[]"
                                                         value="<?php echo esc_attr($option); ?> ">
-                                                        <?php echo esc_html($option); ?>
+                                                    <?php echo esc_html($option); ?>
                                                 </label>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
                                 <?php endif; ?>
-                                <?php if ($input['type'] === 'radio_group') : ?>
+                                <?php if ($input['type'] === 'radio_group'): ?>
                                     <div class="radio-group">
-                                        <?php foreach ($input['options'] as $option_index => $option) : ?>
+                                        <?php foreach ($input['options'] as $option_index => $option): ?>
                                             <div>
                                                 <label>
-                                                    <input type="radio" 
-                                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
+                                                    <input type="radio"
+                                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>"
                                                         value="<?php echo esc_attr($option); ?>">
                                                     <?php echo esc_html($option); ?>
                                                 </label>
@@ -52,24 +52,19 @@ function sproduct_display_form_on_single($content)
                                         <?php endforeach; ?>
                                     </div>
                                 <?php endif; ?>
-                                <?php if ($input['type'] === 'text') : ?>
-                                    <input type="text" 
-                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
+                                <?php if ($input['type'] === 'text'): ?>
+                                    <input type="text" name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>"
                                         placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
 
                                 <?php elseif ($input['type'] === 'national_code' || $input['type'] === 'post_code'): ?>
                                     <input type="nationalcode" name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>"
                                         placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
-                                <?php elseif ($input['type'] === 'date') : ?>
-                                    <input 
-                                        type="text" 
-                                        id="<?php echo esc_attr($input['id']); ?>" 
-                                        class="datepicker-input" 
-                                        placeholder="<?php echo esc_attr($input['placeholder'] ?? 'Select a date'); ?>" 
-                                    />
-                                <?php elseif ($input['type'] === 'mobile') : ?>
-                                    <input type="tel" 
-                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>" 
+                                <?php elseif ($input['type'] === 'date'): ?>
+                                    <input type="text" id="<?php echo esc_attr($input['id']); ?>" class="datepicker-input"
+                                        name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>"
+                                        placeholder="<?php echo esc_attr($input['placeholder'] ?? 'Select a date'); ?>" />
+                                <?php elseif ($input['type'] === 'mobile'): ?>
+                                    <input type="tel" name="sproduct_input_<?php echo $step_index; ?>_<?php echo $input_index; ?>"
                                         placeholder="<?php echo esc_attr($input['placeholder'] ?? ''); ?>" />
 
                                 <?php elseif ($input['type'] === 'telephone'): ?>
@@ -106,6 +101,58 @@ function sproduct_display_form_on_single($content)
                                     </div>
                                 <?php endforeach; ?>
                             </div>
+
+
+
+
+                        <?php endif; ?>
+
+                        <?php if ($step_index === count($form_data) - 1 && !empty($plans)): ?>
+
+
+                            <?php
+
+                            $sproduct_id = get_the_ID();
+
+                            $args = [
+                                'post_type' => 'product',
+                                'post_status' => 'publish',
+                                'posts_per_page' => -1,
+                                'meta_query' => [
+                                    [
+                                        'key' => '_selected_sproduct_ids',
+                                        'value' => 'i:' . $sproduct_id . ';',
+                                        'compare' => 'LIKE',
+                                    ]
+                                ]
+                            ];
+
+                            $query = new WP_Query($args);
+                            ?>
+                            <?php if ($query->have_posts()): ?>
+                                <div class="productToSproductsDivParent">
+                                    <h3>محصولاتی که این اشتراک را انتخاب کرده‌اند:</h3>
+                                    <div class="productToSproductsDiv">
+                                        <?php while ($query->have_posts()):
+                                            $query->the_post(); ?>
+
+                                            <label>
+                                                <input type="checkbox" name="selected_products[]" value="<?php echo get_the_ID(); ?>">
+                                                <img src="<?php the_post_thumbnail_url() ?>" />
+                                                <?php the_title(); ?>
+                                            </label>
+
+                                        <?php endwhile; ?>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <p>هیچ محصولی با این اشتراک مرتبط نیست.</p>
+                            <?php endif; ?>
+
+                            <?php wp_reset_postdata(); // بازنشانی کوئری ?>
+
+
+
                         <?php endif; ?>
 
                     </div>
@@ -138,7 +185,7 @@ function sproduct_enqueue_frontend_assets()
 
         wp_enqueue_script('persian-date', SPRODUCT_URL . 'assets/persian-date.min.js', ['jquery'], null, true);
         wp_enqueue_script('persian-datepicker', SPRODUCT_URL . 'assets/persian-datepicker.min.js', ['jquery'], null, true);
-        
+
         // Pass AJAX URL and nonce to JavaScript
         wp_localize_script('sproduct-frontend-js', 'sproductAjax', [
             'ajaxurl' => admin_url('admin-ajax.php'),
