@@ -110,12 +110,32 @@ jQuery(document).ready(function ($) {
                         <input type="text" class="placeholder-input" placeholder="Placeholder text" value="${input.placeholder || ''}" />    
                         <input type="checkbox" class="required-checkbox" ${input.required ? 'checked' : ''} /> ضروری
                         <button type="button" class="delete-input-btn button button-small button-danger">X</button>
+                        ${input.type === 'radio_group' || input.type === 'checkbox_group'
+                    ? `<div class="horizVertparent">
+                            <label>افقی</label>
+                            <input class="horizontal-checkbox horizVert" type="radio" name="orientation" ${input.horizontal ? 'checked' : ''} value="horizontal" />
+                            <label>عمودی</label>
+                            <input class="vertical-checkbox horizVert" type="radio" name="orientation" ${input.vertical ? 'checked' : ''} value="vertical" />
+                        </div>`
+                    : ''
+                }
+    
                     </div>
                 </div>
             `);
+
+
+
+
             // Apply .is_required class dynamically
             if (input.required) {
                 inputDiv.addClass('is_required');
+            }
+            if (input.horizontal) {
+                inputDiv.addClass('horizontalSelected');
+            }
+            if (input.vertical) {
+                inputDiv.addClass('verticalSelected');
             }
             // Update label and type in formData on input
             inputDiv.find('label').on('input', function () {
@@ -184,7 +204,7 @@ jQuery(document).ready(function ($) {
                     const newIndex = repeater.find('.checkbox-item').length + 1;
                     let options = [];
                     let countCheckBox = 0;
-                    const uniqueId =`ck-${stepIndex}-${inputIndex}-${options.length + 1}`;
+                    const uniqueId = `ck-${stepIndex}-${inputIndex}-${options.length + 1}`;
                     options.push({ id: uniqueId, value: '' });
                     const newOption = $(`
                         <div class="checkbox-item">
@@ -290,6 +310,27 @@ jQuery(document).ready(function ($) {
                 }
                 saveForm();
             });
+            inputDiv.find('.horizVert').on('change', function () {
+                const isCheckedHorizontal = inputDiv.find('.horizontal-checkbox').is(':checked');
+                const isCheckedVertical = inputDiv.find('.vertical-checkbox').is(':checked');
+
+                formData[stepIndex].inputs[inputIndex].horizontal = isCheckedHorizontal;
+                formData[stepIndex].inputs[inputIndex].vertical = isCheckedVertical;
+
+                if (isCheckedHorizontal) {
+                    inputDiv.addClass('horizontalSelected');
+                    inputDiv.removeClass('verticalSelected');
+                } else if (isCheckedVertical) {
+                    inputDiv.addClass('verticalSelected');
+                    inputDiv.removeClass('horizontalSelected');
+                } else {
+                    inputDiv.removeClass('horizontalSelected verticalSelected');
+                }
+
+                // ذخیره فرم
+                saveForm();
+            });
+
             inputDiv.find('.input-type').on('change', function () {
                 const newType = $(this).val();
                 formData[stepIndex].inputs[inputIndex].type = $(this).val();
@@ -303,8 +344,24 @@ jQuery(document).ready(function ($) {
                 if (newType === 'radio_group') {
                     const repeater = $('<div class="radio-repeater"></div>');
 
-                    // Add Option Button
                     const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
+                    const horizontalVerticalRadio = $(`
+                    <div class="horizVertparent">
+                        <label>افقی</label>
+                        <input class="horizontal-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.horizontal ? 'checked' : ''} value="horizontal" />
+                        <label>عمودی</label>
+                        <input class="vertical-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.vertical ? 'checked' : ''} value="vertical" />
+                    </div>
+                    `)
+                    horizontalVerticalRadio.find('.horizVert').on('change', function () {
+                        const value = $(this).val(); // دریافت مقدار انتخاب شده
+                        formData[stepIndex].inputs[inputIndex].horizontal = (value === 'horizontal');
+                        formData[stepIndex].inputs[inputIndex].vertical = (value === 'vertical');
+
+                        // ذخیره فرم
+                        saveForm();
+                    });
+                    horizontalVerticalRadio.insertBefore(repeater);
                     addOptionBtn.on('click', function () {
                         const newOptionDiv = $(`
                             <div class="radio-item">
@@ -362,7 +419,23 @@ jQuery(document).ready(function ($) {
                 }
                 if (newType === 'checkbox_group') {
                     const repeater = $('<div class="checkbox-repeater"></div>');
+                    const horizontalVertical = $(`
+                        <div class="horizVertparent">
+                            <label>افقی</label>
+                            <input class="horizontal-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.horizontal ? 'checked' : ''} value="horizontal" />
+                            <label>عمودی</label>
+                            <input class="vertical-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.vertical ? 'checked' : ''} value="vertical" />
+                        </div>
+                        `);
+                    horizontalVertical.find('.horizVert').on('change', function () {
+                        const value = $(this).val(); // دریافت مقدار انتخاب شده
+                        formData[stepIndex].inputs[inputIndex].horizontal = (value === 'horizontal');
+                        formData[stepIndex].inputs[inputIndex].vertical = (value === 'vertical');
 
+                        // ذخیره فرم
+                        saveForm();
+                    });
+                    horizontalVertical.insertBefore(repeater);
                     // Add Option Button
                     const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
                     addOptionBtn.on('click', function () {
@@ -409,6 +482,22 @@ jQuery(document).ready(function ($) {
                     });
                     // Restore saved options during re-render
                     const options = formData[stepIndex].inputs[inputIndex].options || [];
+                    const horizontalVertical1 = $(`
+                    <div class="horizVertparent">
+                        <label>افقی</label>
+                        <input class="horizontal-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.horizontal ? 'checked' : ''} value="horizontal" />
+                        <label>عمودی</label>
+                        <input class="vertical-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.vertical ? 'checked' : ''} value="vertical" />
+                    </div>
+                    `)
+                    horizontalVertical1.find('.horizVert').on('change', function () {
+                        const value = $(this).val(); // دریافت مقدار انتخاب شده
+                        formData[stepIndex].inputs[inputIndex].horizontal = (value === 'horizontal');
+                        formData[stepIndex].inputs[inputIndex].vertical = (value === 'vertical');
+
+                        // ذخیره فرم
+                        saveForm();
+                    });
                     options.forEach((option, index) => {
                         const optionDiv = $(`
                             <div class="checkbox-item">
@@ -420,7 +509,8 @@ jQuery(document).ready(function ($) {
                         repeater.append(optionDiv);
                     });
                     // Append the repeater below the input
-                    inputDiv.append(repeater);
+                    inputDiv.append(repeater); // اضافه کردن repeater به inputDiv
+                    horizontalVertical1.insertBefore(repeater);
                 }
                 saveForm();
             });
@@ -484,7 +574,7 @@ jQuery(document).ready(function ($) {
                 if (inputType === 'date' && !formData[stepIndex].inputs[inputIndex].id) {
                     const stepIndex = $(this).closest('.step').data('step-index'); // Get the step index
                     const inputIndex = formData[stepIndex].inputs.length; // Get the current input index within the step
-    
+
                     formData[stepIndex].inputs[inputIndex].id = `datepicker${stepIndex}${inputIndex}`;
                 }
             });
