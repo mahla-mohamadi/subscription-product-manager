@@ -13,6 +13,7 @@ function sproduct_create_db_tables() {
             end_date DATE NOT NULL,
             plan TEXT NOT NULL,
             amount INT NOT NULL,
+            formdata TEXT NOT NULL,
             status VARCHAR(20) NOT NULL DEFAULT 'active',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
