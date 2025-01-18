@@ -268,3 +268,8 @@ input.condition-input {
     border-radius: 6px !important;
     background-color: white;
 }
+
+.horizVertparent label {
+    padding: 8px 10px !important;
+    border: 0 !important;
+}

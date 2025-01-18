@@ -20,9 +20,11 @@ function sproduct_display_form_on_single($content)
                     <div class="sproduct-step" data-step="<?php echo $step_index; ?>" <?php echo $step_index !== 0 ? 'style="display:none;"' : ''; ?>>
 
                         <h3><?php echo esc_html($step['name']); ?></h3>
-                        <?php foreach ($step['inputs'] as $input_index => $input): ?>
+                        <?php foreach ($step['inputs'] as $input_index => $input):  ?>
 
-                            <div class="sproduct-input <?php echo $input['required'] ? 'is_required' : ''; ?>">
+                            <div class="sproduct-input <?php echo $input['required'] ? 'is_required' : ''; ?><?php echo !empty($input['vertical']) ? 'verticalSelected' : ''; ?> 
+                                        <?php echo !empty($input['horizontal']) ? 'horizontalSelected' : ''; ?>">
+
                                 <label><?php echo esc_html($input['label']); ?></label>
                                 <?php if ($input['type'] === 'checkbox_group'): ?>
                                     <div class="checkbox-group">
