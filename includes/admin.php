@@ -102,6 +102,9 @@ function subscriptions_page_callback(){
     echo '</thead>';
     echo '<tbody class="subscriptionsTableMainBody">';
     if (!empty($results)) {
+        echo '<pre>';
+        print_r($results);
+        echo '</pre>';
         foreach ($results as $row) {
             $editURL = admin_url('admin.php?page=edit-subscription&subscription_id=' . $row->id);
             $fullUserName = get_user_meta( $row->user_id, 'first_name', true ).' '.get_user_meta( $row->user_id, 'last_name', true );
@@ -117,7 +120,7 @@ function subscriptions_page_callback(){
             } else {
                 echo '<td class="DeactiveButton"><span>غیر فعال</span></td>';
             }
-            echo '<td><a href="'.esc_url($editURL).'">' . esc_html($row->edit) . '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><g stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.28 6.4-9.54 9.54c-.95.95-3.77 1.39-4.4.76s-.2-3.45.75-4.4l9.55-9.55a2.58 2.58 0 1 1 3.64 3.65"/><path d="M11 4H6a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h11c2.21 0 3-1.8 3-4v-5"/></g></svg></a></td>';
+            echo '<td><a href="'.esc_url($editURL).'"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><g stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.28 6.4-9.54 9.54c-.95.95-3.77 1.39-4.4.76s-.2-3.45.75-4.4l9.55-9.55a2.58 2.58 0 1 1 3.64 3.65"/><path d="M11 4H6a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h11c2.21 0 3-1.8 3-4v-5"/></g></svg></a></td>';
             echo '</tr>';
         }
     } else {
@@ -170,21 +173,30 @@ function edit_subscription_page_callback(){
         // );
         $fullUserName = get_user_meta( $subscription->user_id, 'first_name', true ).' '.get_user_meta( $subscription->user_id, 'last_name', true );
         if ($subscription) {
+            echo '<pre>';
+            print_r($subscription);
+            echo '</pre>';
             $jalali_start_date = convert_to_jalali($subscription->start_date);
             $jalali_end_date = convert_to_jalali($subscription->end_date);
             $sproductName = get_the_title($subscription->sproduct_id);
+            if (esc_html($subscription->status) == "active") {
+                $statusBadge = '<span style="background-color: #d2ffc9;padding: 3px 10px;border-radius: 2px;color: #384a34;border: 1px solid #bceeb2;">فعال</span>';
+            } else {
+                $statusBadge = '<span style="background-color: #ffc9c9;padding: 3px 10px;border-radius: 2px;color: #4a3434;border: 1px solid #eeb2b2;" class="DeactiveButton">غیر فعال</span>';
+            }
             echo "<h1>ویرایش اشتراک</h1>";
             echo "<p>اشتراک {$subscription->plan} {$fullUserName} ({$subscription->remaining_days} روز باقی مانده)</p>";
             echo "<p>نام سرویس: {$sproductName}</p>";
             echo "<p>تاریخ شروع: {$jalali_start_date}</p>";
             echo "<p>تاریخ پایان: {$jalali_end_date}</p>";
-            echo "<p>وضعیت: {$subscription->status}</p>";
-            echo "<p>تاریخ ایجاد: {$subscription->created_at}</p>";
+            echo "<p>هزینه تمدید: {$subscription->amount} تومان</p>";
+            echo "<p>وضعیت: {$statusBadge}</p>";
 
             // Add a form for editing if needed
             echo '<form method="post">';
-            echo '<label for="name">نام:</label>';
-            echo '<input type="text" id="name" name="name" value="' . esc_attr($subscription->name) . '">';
+            echo '<input type="hidden" name="edit_hidden_id" id="edit_hidden_id" value="'.esc_attr($subscription->id).'">';
+            echo '<label for="edit_sub_plan">پلن:</label>';
+            echo '<input type="text" id="edit_sub_name" name="edit_sub_name" value="' . esc_attr($subscription->name) . '">';
             echo '<br>';
             echo '<label for="status">وضعیت:</label>';
             echo '<input type="text" id="status" name="status" value="' . esc_attr($subscription->status) . '">';

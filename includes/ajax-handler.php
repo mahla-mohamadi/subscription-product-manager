@@ -120,6 +120,7 @@ function sproduct_create_subscription_on_order($order_id) {
         // $price = wc_get_order_item_meta($item_id, 'قیمت', true);  // Price
         $price = $item->get_total();
         $duration = wc_get_order_item_meta($item_id, 'مدت زمان', true);  // Duration in days
+        $form = wc_get_order_item_meta($item_id, '_sproduct_form', true);
         if (empty($spn) || empty($pn) || empty($price) || empty($duration)) {
             error_log("Missing subscription item meta for order #{$order_id}, item #{$item_id}");
             continue;
@@ -135,6 +136,7 @@ function sproduct_create_subscription_on_order($order_id) {
                 'start_date'  => $start_date,
                 'end_date'    => $end_date,
                 'plan'        => $pn,
+                'formdata'        => $form,
                 'amount'      => $price,
                 'status'      => 'active',
             ),
