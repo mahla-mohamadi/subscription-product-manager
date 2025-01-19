@@ -23,6 +23,7 @@ require_once SPRODUCT_PATH . 'includes/ajax-handler.php';     // AJAX Handlers
 require_once SPRODUCT_PATH . 'includes/db.php';               // Database Operations (Optional)
 require_once SPRODUCT_PATH . 'includes/subscription-product.php';            
 require_once SPRODUCT_PATH . 'includes/profile.php';          
+require_once SPRODUCT_PATH . 'includes/wallet.php';          
 
 // Activation Hook (Create Tables on Activation)
 register_activation_hook(__FILE__, 'sproduct_install');

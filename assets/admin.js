@@ -204,12 +204,11 @@ jQuery(document).ready(function ($) {
                     const newIndex = repeater.find('.checkbox-item').length + 1;
                     let options = [];
                     let countCheckBox = 0;
-                    const uniqueId = `ck-${stepIndex}-${inputIndex}-${options.length + 1}`;
-                    options.push({ id: uniqueId, value: '' });
+                    // const uniqueId = `ck-${stepIndex}-${inputIndex}-${options.length + 1}`;
+                    // options.push({ id: uniqueId, value: '' });
                     const newOption = $(`
                         <div class="checkbox-item">
                             <input type="text" value="" class="checkbox-option" placeholder="Option ${newIndex}">
-                            <span class="checkbox-id uniqueid-checkbox">${uniqueId}</span>
                             <button type="button" class="delete-option">X</button>
                         </div>
                     `);
@@ -440,12 +439,11 @@ jQuery(document).ready(function ($) {
                     const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
                     addOptionBtn.on('click', function () {
                         let options = [];
-                        const uniqueId = `ck-${stepIndex}-${inputIndex}-${options.length + 1}`;
-                        options.push({ id: uniqueId, value: '' });
+                        // const uniqueId = `ck-${stepIndex}-${inputIndex}-${options.length + 1}`;
+                        // options.push({ id: uniqueId, value: '' });
                         const newOptionDiv = $(`
                             <div class="checkbox-item">
                                 <input type="text" value="" class="checkbox-option" placeholder="Option ${repeater.find('.checkbox-item').length + 1}">
-                                <span class="checkbox-id uniqueid-checkbox">${uniqueId}</span>
                                 <button type="button" class="delete-option">X</button>
                             </div>
                         `);
