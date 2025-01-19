@@ -135,13 +135,50 @@ function sproduct_display_form_on_single($content)
                                     <div class="productToSproductsDiv">
                                         <?php while ($query->have_posts()):
                                             $query->the_post(); ?>
+                                            <?php
 
-                                            <label>
-                                                <input type="checkbox" name="selected_products[]" value="<?php echo get_the_ID(); ?>">
-                                                <img src="<?php the_post_thumbnail_url() ?>" />
-                                                <?php the_title(); ?>
-                                            </label>
+                                            $product = wc_get_product(get_the_ID());
 
+
+                                            if ($product->is_type('variable')) {
+
+                                                $variations = $product->get_available_variations();
+
+                                                foreach ($variations as $variation) {
+                                                    $variation_id = $variation['variation_id'];
+                                                    $variation_price = $variation['display_price'];
+                                                    $variation_attributes = $variation['attributes'];
+                                                    ?>
+                                                    <label>
+                                                        <input type="checkbox" name="selected_products[]"
+                                                            value="<?php echo esc_attr($variation_id); ?>">
+                                                        <img src="<?php echo get_the_post_thumbnail_url(); ?>" />
+                                                        <strong><?php echo $product->get_name(); ?></strong>
+                                                        <?php
+
+                                                        foreach ($variation_attributes as $attr_name => $attr_value) {
+                                                            echo '<span>' . esc_html($attr_value) . '</span>';
+                                                        }
+                                                        ?>
+                                                        <span>قیمت: <?php echo wc_price($variation_price); ?></span>
+                                                    </label>
+                                                    <?php
+                                                }
+                                            } else {
+                                                ?>
+                                                <label>
+                                                    <input type="checkbox" name="selected_products[]" value="<?php echo get_the_ID(); ?>">
+                                                    <img src="<?php echo get_the_post_thumbnail_url(); ?>" />
+                                                    <strong><?php the_title(); ?></strong>
+                                                    <?php if ($product->price) { ?>
+                                                        <span>قیمت: <?php echo $product->get_price_html(); ?></span>
+                                                    <?php } else { ?>
+                                                        <span>قیمت: ندارد</span>
+                                                    <?php } ?>
+                                                </label>
+                                                <?php
+                                            }
+                                            ?>
                                         <?php endwhile; ?>
                                     </div>
                                 </div>
@@ -149,8 +186,7 @@ function sproduct_display_form_on_single($content)
                                 <p>هیچ محصولی با این اشتراک مرتبط نیست.</p>
                             <?php endif; ?>
 
-                            <?php wp_reset_postdata(); // بازنشانی کوئری ?>
-
+                            <?php wp_reset_postdata(); ?>
 
 
                         <?php endif; ?>
