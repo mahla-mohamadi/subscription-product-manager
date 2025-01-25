@@ -102,9 +102,7 @@ function subscriptions_page_callback(){
     echo '</thead>';
     echo '<tbody class="subscriptionsTableMainBody">';
     if (!empty($results)) {
-        echo '<pre>';
-        print_r($results);
-        echo '</pre>';
+
         foreach ($results as $row) {
             $editURL = admin_url('admin.php?page=edit-subscription&subscription_id=' . $row->id);
             $fullUserName = get_user_meta( $row->user_id, 'first_name', true ).' '.get_user_meta( $row->user_id, 'last_name', true );
@@ -157,11 +155,20 @@ function edit_subscription_page_callback(){
             $wpdb->prepare(
                 "SELECT *, DATEDIFF(end_date, CURDATE()) AS remaining_days
                 FROM $table_name
+                WHERE id = %d",
+                $subscription_id
+            )
+        );
+        $suspensionSubs = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT *, DATEDIFF(end_date, CURDATE()) AS remaining_days
+                FROM $table_name
                 WHERE id = %d
                 AND end_date >= CURDATE()",
                 $subscription_id
             )
         );
+        
         // $user_info = $wpdb->get_results(
         //     $wpdb->prepare(
         //         "SELECT meta_key, meta_value 
@@ -173,9 +180,6 @@ function edit_subscription_page_callback(){
         // );
         $fullUserName = get_user_meta( $subscription->user_id, 'first_name', true ).' '.get_user_meta( $subscription->user_id, 'last_name', true );
         if ($subscription) {
-            echo '<pre>';
-            print_r($subscription);
-            echo '</pre>';
             $jalali_start_date = convert_to_jalali($subscription->start_date);
             $jalali_end_date = convert_to_jalali($subscription->end_date);
             $sproductName = get_the_title($subscription->sproduct_id);
@@ -191,6 +195,79 @@ function edit_subscription_page_callback(){
             echo "<p>تاریخ پایان: {$jalali_end_date}</p>";
             echo "<p>هزینه تمدید: {$subscription->amount} تومان</p>";
             echo "<p>وضعیت: {$statusBadge}</p>";
+
+            // Display WooCommerce orders for the user
+            echo "<h2>پرداخت‌های کاربر</h2>";
+            $user_id = $subscription->user_id;
+            $skus_to_search = ['s_prod_virtual', 'wallet_prod_virtual'];
+            $hidden_virtual_product_ids = [];
+            // Query WooCommerce to get product IDs by SKUs
+            foreach ($skus_to_search as $sku) {
+                $product = wc_get_product_id_by_sku($sku);
+                if ($product) {
+                    $hidden_virtual_product_ids[] = $product;
+                }
+            }
+            // If no products were found, display an error message
+            if (empty($hidden_virtual_product_ids)) {
+                echo "<p>محصولات مجازی مخفی با این شناسه‌ها پیدا نشدند.</p>";
+                return;
+            }
+            // Query WooCommerce orders
+            // دریافت سفارش‌های کاربر
+            $customer_orders = wc_get_orders(array(
+                'customer_id' => $user_id,
+                'limit' => -1, // بدون محدودیت
+                'orderby' => 'date',
+                'order' => 'DESC',
+            ));
+
+            if ($customer_orders) {
+                echo "<table border='1' style='width:100%; text-align: center;'>";
+                echo "<tr>
+                        <th>سریال سفارش</th>
+                        <th>اقدام</th>
+                        <th>مبلغ</th>
+                        <th>تاریخ</th>
+                    </tr>";
+                    $orders_found = false; // Track if any orders match the criteria
+                foreach ($customer_orders as $order) {
+                    $order_id = $order->get_id();
+                    $order_date = $order->get_date_created();
+                    // $order_status = $order->get_status();
+                    $order_total = $order->get_total(); // Get the total price of the order
+                    $formatted_date = $order_date ? $order_date->date('Y-m-d') : '';
+                    $newDate = convert_to_jalali($formatted_date);
+                    // Check if the order contains any of the hidden virtual products
+                    $contains_hidden_virtual_product = false;
+                    $product_names = []; // Store product names for the matching products
+                    foreach ($order->get_items() as $item) {
+                        if (in_array($item->get_product_id(), $hidden_virtual_product_ids)) {
+                            $contains_hidden_virtual_product = true;
+                            $product_names[] = $item->get_name(); // Add product name to the list
+                            break;
+                        }
+                    }
+                    // Display the order only if it contains one of the hidden virtual products
+                    if ($contains_hidden_virtual_product) {
+                        $orders_found = true;
+                        $product_names_string = implode(', ', $product_names); // Combine product names
+                        echo "<tr>
+                                <td>{$order_id}</td>
+                                <td>{$product_names_string}</td>
+                                <td>{$order_total} تومان</td>
+                                <td>{$newDate}</td>
+                            </tr>";
+                    }
+                }
+                if (!$orders_found) {
+                    echo "<tr><td colspan='4'>هیچ سفارشی با محصولات مجازی مورد نظر پیدا نشد.</td></tr>";
+                }
+                echo "</table>";
+            } else {
+                echo "<p>این کاربر سفارشی ندارد.</p>";
+            }
+
 
             // Add a form for editing if needed
             echo '<form method="post">';
