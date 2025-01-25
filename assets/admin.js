@@ -1,589 +1,191 @@
 jQuery(document).ready(function ($) {
-    const formBuilder = $('.form-steps');
-    const hiddenInput = $('#sproduct_form_data');
-    const addStepBtn = $('#add-step-btn');
-
+    const formContainer = $('.form-steps');
+    function initializeSortable() {
+        new Sortable($('.form-steps')[0], {
+            animation: 150,
+            onEnd: function () {
+                updateFormData();
+            },
+        });
+        $('.step-input-container').each(function () {
+            new Sortable(this, {
+                animation: 150,
+                onEnd: function () {
+                    updateFormData();
+                },
+            });
+        });
+        $('.input-option-container .options').each(function () {
+            new Sortable(this, {
+                animation: 150,
+                onEnd: function () {
+                    updateFormData();
+                },
+            });
+        });
+    }
+    function renderAdminForm(formData){
+        console.log(formData);
+        formContainer.html('');
+        let stepContainer = '';
+        $.each(formData , function(stepIndex,step){
+            stepContainer += '<div class="step" data-step-index="'+stepIndex+'">';
+            stepContainer +='<div class="step-header"><label class="step-label">نام:<input type="text" id="step-heading-input" class="step-input" value="'+ step.name+'" dir="rtl"></label><div id="remove-step" class="remove-step"><svg fill="#d11b1b" viewBox="0 0 1024 1024" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M352 480h320a32 32 0 1 1 0 64H352a32 32 0 0 1 0-64"/><path d="M512 896a384 384 0 1 0 0-768 384 384 0 0 0 0 768m0 64a448 448 0 1 1 0-896 448 448 0 0 1 0 896"/></svg></div></div>';
+            stepContainer += '<div class="step-input-container">';
+            $.each(step.inputs , function(inputIndex,input){
+                stepContainer += '<div class="input" data-input-index="'+inputIndex+'">';
+                stepContainer += '<label><input type="checkbox" class="input-required"'+(input.isRequired?'checked':'')+'>ضروری</label>';
+                stepContainer += '<label>نوع<select class="input-type"><option value="text"'+(input.type=='text'?'selected':'')+'>متن</option><option value="email"'+(input.type=='email'?'selected':'')+'>ایمیل</option><option value="number"'+(input.type=='number'?'selected':'')+'>عدد</option><option value="birthday"'+(input.type=='birthday'?'selected':'')+'>تاریخ تولد</option><option value="datepicker"'+(input.type=='datepicker'?'selected':'')+'>انتخابگر تاریخ</option><option value="nationalcode"'+(input.type=='nationalcode'?'selected':'')+'>کد ملی</option><option value="postcode"'+(input.type=='postcode'?'selected':'')+'>کد پستی</option><option value="phonenumber"'+(input.type=='phonenumber'?'selected':'')+'>شماره همراه</option><option value="phone"'+(input.type=='phone'?'selected':'')+'>شماره ثابت</option><option value="textarea"'+(input.type=='textarea'?'selected':'')+'>ناحیه متنی</option><option value="radio"'+(input.type=='radio'?'selected':'')+'>انتخاب تکی</option><option value="checkbox"'+(input.type=='checkbox'?'selected':'')+'>انتخاب چندگانه</option><option value="file"'+(input.type=='file'?'selected':'')+'>فایل</option></select></label>';
+                stepContainer += '<label>نام<input class="input-name" type="text" value="'+input.name+'"></label>';
+                stepContainer += '<label>نگهدارنده<input class="input-placeholder" type="text" value="'+input.placeholder+'"></label>';
+                stepContainer += '<label>عرض<select class="input-width"><option value="half"'+(input.width=='half'?'selected':'')+'>نیمه</option><option value="full"'+(input.width=='full'?'selected':'')+'>عریض</option></select></label>';
+                stepContainer += '<div class="logic-input-container">';
+                if(input.type=='text'||input.type=='number'){stepContainer += '<div class="logic">';}
+                if(input.type == 'text'){
+                    stepContainer += '<label>حداقل کاراکتر<input class="logic-min-char" type="number" value="'+input.logics[0].minchar+'"></label>';
+                    stepContainer += '<label>حداکثر کاراکتر<input class="logic-max-char" type="number" value="'+input.logics[0].maxchar+'"></label>';
+                }
+                else if(input.type == 'number'){
+                    stepContainer += '<label>حداقل مقدار<input class="logic-min-num" type="number" value="'+input.logics[0].minnum+'"></label>';
+                    stepContainer += '<label>حداکثر مقدار<input class="logic-max-num" type="number" value="'+input.logics[0].maxnum+'"></label>';
+                }
+                if(input.type=='text'||input.type=='number'){stepContainer += '</div>';}
+                stepContainer += '</div>';
+                stepContainer += '<div class="input-option-container">';
+                if(input.type=='radio'||input.type=='checkbox'){stepContainer += '<div class="options">';}
+                $.each(input.options, function(optionIndex,option){
+                    stepContainer += '<label>گزینه<input class="option" type="text" value="'+option.name+'"></label>';
+                })
+                if(input.type=='radio'||input.type=='checkbox'){stepContainer += '<div id="add-option" class="button-primary add-option">+ گزینه</div>';}
+                if(input.type=='radio'||input.type=='checkbox'){stepContainer += '</div>';}
+                stepContainer += '</div>';
+                stepContainer += '<div id="remove-input" class="remove-step"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 11v6m4-6v6M4 7h16M6 7h12v11a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3zm3-2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2H9z" stroke="#d11b1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+                stepContainer += '</div>';
+            });
+            stepContainer += '</div>';
+            $(formContainer).html(stepContainer);
+            stepContainer += '<div id="add-input-field" class="button-primary add-input-field">افزودن فیلد</div>';
+            stepContainer += '</div>';
+        });
+        $(formContainer).html(stepContainer);
+        initializeSortable();
+    }
+    function updateFormData(){
+        let formDataUpdate = [];
+        $.each($('.step'),function(){
+            let step = $(this);
+            let stepData = {
+                name: step.find('#step-heading-input').val(),
+                inputs: [],
+            }
+            $.each(step.find('.input'),function(){
+                let input = $(this);
+                let isInputRequired = input.find('.input-required').is(':checked');
+                let inputData = {
+                    type: input.find('.input-type').val(),
+                    name: input.find('.input-name').val(),
+                    placeholder: input.find('.input-placeholder').val(),
+                    isRequired: isInputRequired,
+                    options: [],
+                    width: input.find('.input-width').val(),
+                    logics:[],
+                }
+                let logicData = {
+                    minchar: (input.find('.logic-min-char').val() ? input.find('.logic-min-char').val() : ''),
+                    maxchar: (input.find('.logic-max-char').val() ? input.find('.logic-max-char').val() : ''),
+                    minnum: (input.find('.logic-min-num').val() ? input.find('.logic-min-num').val() : ''),
+                    maxnum: (input.find('.logic-max-num').val() ? input.find('.logic-max-num').val() : ''),
+                }
+                $.each(input.find('.options input'),function(){
+                    inputData.options.push({name:$(this).val()})
+                });
+                inputData.logics.push(logicData);
+                stepData.inputs.push(inputData);
+            });
+            formDataUpdate.push(stepData);
+        });
+        formData = formDataUpdate;
+    }
+    function operateInputLogicHTML(type){
+        switch (type) {
+            case 'text':
+                cont = '<div class="logic"><label>حداقل کاراکتر<input class="logic-min-char" type="number"></label><label>حداکثر کاراکتر<input class="logic-max-char" type="number"></label></div>';
+                break;
+            case 'number':
+                cont = '<div class="logic"><label>حداقل مقدار<input class="logic-min-num" type="number"></label><label>حداکثر مقدار<input class="logic-max-num" type="number"></label></div>';
+                break;
+            default:
+                cont = '';
+        }
+        return cont;
+    }
     let formData = window.sproductFormData && Array.isArray(window.sproductFormData)
         ? window.sproductFormData
         : [];
-    renderForm();
-    addStepBtn.on('click', function () {
-        const newStep = {
-            name: 'New Step',
-            inputs: [],
-        };
+    renderAdminForm(formData);
+    $('#add-step-btn').on('click', function () {
+        updateFormData();
+        const newStep = {name: 'مرحله',inputs: []};
         formData.push(newStep);
-        renderForm();
-        saveForm();
+        renderAdminForm(formData);
     });
-    // Render Form Steps and Inputs
-    function renderForm() {
-        formBuilder.html('');
-        formData.forEach((step, stepIndex) => {
-            const stepDiv = $(`
-                <div class="step" data-step-index="${stepIndex}">
-                    <div class="step-header">
-                        <button type="button" class="delete-step-btn button button-danger">X</button>
-                        <h3 contenteditable="true" class="step-title">${step.name}</h3>
-                    </div>
-                    <select class="step-condition">
-                        <option value="">No Condition</option>
-                        <option value="checkbox">Show if Checkbox</option>
-                        <option value="select">Show if Select</option>
-                    </select>
-                    <button type="button" class="add-input-btn button">افزودن +</button>
-                    <div class="inputs" data-step-index="${stepIndex}"></div>
-                </div>
-            `);
-
-            // Step Events
-            stepDiv.find('.step-condition').val(step.condition || '').on('change', function () {
-                formData[stepIndex].condition = $(this).val();
-                saveForm();
-            });
-
-            stepDiv.find('.step-title').on('input', function () {
-                formData[stepIndex].name = $(this).text();
-                saveForm();
-            });
-            let datePickerCounter = 1; // Counter for datepicker inputs
-            stepDiv.find('.add-input-btn').on('click', function () {
-                const stepIndex = $(this).closest('.step').data('step-index'); // Get the step index
-                const inputIndex = formData[stepIndex].inputs.length; // Get the current input index within the step
-
-                const newInput = {
-                    label: 'New Input',
-                    type: 'text',
-                    required: false,
-                    options: [],
-                    id: `datepicker${stepIndex}${inputIndex}` // Generate a unique ID based on timestamp
-                };
-                // Check if the new input is a date
-                // Check if the new input is a date
-                const inputType = $(this).siblings('.input-type').val();
-                if (inputType === 'date') {
-                    newInput.type = 'date';
-                    newInput.id = `datepicker${stepIndex}${inputIndex}`; // Generate ID specifically for date inputs
-                }
-                formData[stepIndex].inputs.push(newInput);
-                renderForm();
-                saveForm();
-            });
-
-            stepDiv.find('.delete-step-btn').on('click', function () {
-                if (confirm('Delete this step?')) {
-                    formData.splice(stepIndex, 1);
-                    renderForm();
-                    saveForm();
-                }
-            });
-            formBuilder.append(stepDiv);
-            renderInputs(stepDiv.find('.inputs'), step.inputs, stepIndex);
-        });
-        saveForm();
-        makeSortable();
-    }
-
-
-    // Render Individual Inputs
-    function renderInputs(container, inputs, stepIndex) {
-        container.html('');
-        inputs.forEach((input, inputIndex) => {
-            const inputDiv = $(`
-                <div class="input-item" data-input-index="${inputIndex}">
-                    <div class="input-header">
-                        <input type="text" class="condition-input" placeholder="#کد شرط" value="${input.condition || ''}" />
-                        <label contenteditable="true">${input.label}</label>
-                        <select class="input-type">
-                            <option value="text" ${input.type === 'text' ? 'selected' : ''}>Text</option>
-                            <option value="email" ${input.type === 'email' ? 'selected' : ''}>Email</option>
-                            <option value="textarea" ${input.type === 'textarea' ? 'selected' : ''}>Text Area</option>
-                            <option value="national_code" ${input.type === 'national_code' ? 'selected' : ''}>National Code</option>
-                            <option value="post_code" ${input.type === 'post_code' ? 'selected' : ''}>Post Code</option>
-                            <option value="mobile" ${input.type === 'mobile' ? 'selected' : ''}>Mobile Number</option>
-                            <option value="telephone" ${input.type === 'telephone' ? 'selected' : ''}>Telephone</option>
-                            <option value="checkbox_group" ${input.type === 'checkbox_group' ? 'selected' : ''}>Checkbox Group</option>
-                            <option value="radio_group" ${input.type === 'radio_group' ? 'selected' : ''}>Radio Group</option>
-                            <option value="date" ${input.type === 'date' ? 'selected' : ''}>Date</option>
-                        </select>
-                        <!-- Placeholder Field -->
-                        <input type="text" class="placeholder-input" placeholder="Placeholder text" value="${input.placeholder || ''}" />    
-                        <input type="checkbox" class="required-checkbox" ${input.required ? 'checked' : ''} /> ضروری
-                        <button type="button" class="delete-input-btn button button-small button-danger">X</button>
-                        ${input.type === 'radio_group' || input.type === 'checkbox_group'
-                    ? `<div class="horizVertparent">
-                            <label>افقی</label>
-                            <input class="horizontal-checkbox horizVert" type="radio" name="orientation" ${input.horizontal ? 'checked' : ''} value="horizontal" />
-                            <label>عمودی</label>
-                            <input class="vertical-checkbox horizVert" type="radio" name="orientation" ${input.vertical ? 'checked' : ''} value="vertical" />
-                        </div>`
-                    : ''
-                }
-    
-                    </div>
-                </div>
-            `);
-
-
-
-
-            // Apply .is_required class dynamically
-            if (input.required) {
-                inputDiv.addClass('is_required');
-            }
-            if (input.horizontal) {
-                inputDiv.addClass('horizontalSelected');
-            }
-            if (input.vertical) {
-                inputDiv.addClass('verticalSelected');
-            }
-            // Update label and type in formData on input
-            inputDiv.find('label').on('input', function () {
-                formData[stepIndex].inputs[inputIndex].label = $(this).text();
-                saveForm();
-            });
-            inputDiv.find('.condition-input').on('input', function () {
-                formData[stepIndex].inputs[inputIndex].condition = $(this).val();
-                saveForm();
-            });
-            // Update placeholder
-            inputDiv.find('.placeholder-input').on('input', function () {
-                formData[stepIndex].inputs[inputIndex].placeholder = $(this).val();
-                saveForm();
-            });
-            inputDiv.find('.delete-input-btn').on('click', function () {
-                if (confirm('Delete this input?')) {
-                    formData[stepIndex].inputs.splice(inputIndex, 1);
-                    renderInputs(container, formData[stepIndex].inputs, stepIndex);
-                    saveForm();
-                }
-            });
-            // Helper function to render options as checkboxes or radio buttons
-            function renderOptions(container, type, options) {
-                container.find('.checkbox-item').remove(); // Clear existing options
-
-                // Ensure valid options are rendered
-                options.forEach((option, index) => {
-                    const optionDiv = $(`
-                        <div class="checkbox-item">
-                            <input type="${type}" disabled>
-                            <input type="text" value="${option}" class="checkbox-option" placeholder="Option ${index + 1}">
-                            
-                            <button type="button" class="delete-option">X</button>
-                        </div>
-                    `);
-
-                    // Handle delete button for this option
-                    optionDiv.find('.delete-option').on('click', function () {
-                        optionDiv.remove();
-
-                        // Update formData immediately when an option is deleted
-                        const stepIndex = container.closest('.step').data('step-index');
-                        const inputIndex = container.closest('.input-item').data('input-index');
-                        const updatedOptions = [];
-                        container.find('.checkbox-option').each(function () {
-                            const value = $(this).val().trim();
-                            if (value !== '') {
-                                updatedOptions.push(value);
-                            }
-                        });
-                        formData[stepIndex].inputs[inputIndex].options = updatedOptions;
-
-                        saveForm();
-                    });
-
-                    container.append(optionDiv);
-                });
-            }
-            if (input.type === 'checkbox_group') {
-                const repeater = $('<div class="checkbox-repeater"></div>');
-
-                // Add Option Button
-                const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
-                addOptionBtn.on('click', function () {
-                    const newIndex = repeater.find('.checkbox-item').length + 1;
-                    let options = [];
-                    let countCheckBox = 0;
-                    const uniqueId = `ck-${stepIndex}-${inputIndex}-${options.length + 1}`;
-                    options.push({ id: uniqueId, value: '' });
-                    const newOption = $(`
-                        <div class="checkbox-item">
-                            <input type="text" value="" class="checkbox-option" placeholder="Option ${newIndex}">
-                            <span class="checkbox-id uniqueid-checkbox">${uniqueId}</span>
-                            <button type="button" class="delete-option">X</button>
-                        </div>
-                    `);
-                    countCheckBox++;
-
-                    // newOption.find('.checkbox-option').on('input', function () {
-                    //     options[index].value = $(this).val().trim();
-                    // });
-
-                    repeater.append(newOption);
-                    saveOptions(repeater, stepIndex, inputIndex);
-                });
-                // Delete Option Event
-                repeater.on('click', '.delete-option', function () {
-                    $(this).closest('.checkbox-item').remove();
-                    saveOptions(repeater, stepIndex, inputIndex);
-                });
-                // Restore saved options
-                if (input.options && input.options.length > 0) {
-                    input.options.forEach((option, index) => {
-                        const optionDiv = $(`
-                            <div class="checkbox-item">
-                                <input type="text" value="${option}" class="checkbox-option" placeholder="Option ${index + 1}">
-                                
-                                <button type="button" class="delete-option">X</button>
-                            </div>
-                        `);
-                        repeater.append(optionDiv);
-                    });
-                }
-                // Input Event to Save Options
-                repeater.on('input', '.checkbox-option', function () {
-                    saveOptions(repeater, stepIndex, inputIndex);
-                });
-                repeater.append(addOptionBtn);
-                inputDiv.append(repeater);
-            }
-            if (input.type === 'radio_group') {
-                const repeater = $('<div class="radio-repeater"></div>');
-
-                // Add Option Button
-                const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
-                addOptionBtn.on('click', function () {
-                    const newIndex = repeater.find('.radio-item').length + 1;
-                    const newOption = $(`
-                        <div class="radio-item">
-                            <input type="radio" disabled>
-                            <input type="text" value="" class="radio-option" placeholder="Option ${newIndex}">
-                            <button type="button" class="delete-option">X</button>
-                        </div>
-                    `);
-                    repeater.append(newOption);
-                    saveOptions(repeater, stepIndex, inputIndex);
-                });
-
-                // Delete Option Event
-                repeater.on('click', '.delete-option', function () {
-                    $(this).closest('.radio-item').remove();
-                    saveOptions(repeater, stepIndex, inputIndex);
-                });
-
-                // Restore saved options
-                if (input.options && input.options.length > 0) {
-                    input.options.forEach((option, index) => {
-                        const optionDiv = $(`
-                            <div class="radio-item">
-                                <input type="radio" disabled>
-                                <input type="text" value="${option}" class="radio-option" placeholder="Option ${index + 1}">
-                                <button type="button" class="delete-option">X</button>
-                            </div>
-                        `);
-                        repeater.append(optionDiv);
-                    });
-                }
-
-                // Save Options on Input
-                repeater.on('input', '.radio-option', function () {
-                    saveOptions(repeater, stepIndex, inputIndex);
-                });
-
-                repeater.append(addOptionBtn);
-                inputDiv.append(repeater);
-            }
-            if (input.type === 'date') {
-                inputDiv.append(`
-                    <input type="text" id="${input.id}" class="datepicker-input" placeholder="Select a date" />
-                `);
-            }
-
-            // Handle required checkbox
-            inputDiv.find('.required-checkbox').on('change', function () {
-                const isChecked = $(this).is(':checked');
-                formData[stepIndex].inputs[inputIndex].required = isChecked;
-                if (isChecked) {
-                    inputDiv.addClass('is_required');
-                } else {
-                    inputDiv.removeClass('is_required');
-                }
-                saveForm();
-            });
-            inputDiv.find('.horizVert').on('change', function () {
-                const isCheckedHorizontal = inputDiv.find('.horizontal-checkbox').is(':checked');
-                const isCheckedVertical = inputDiv.find('.vertical-checkbox').is(':checked');
-
-                formData[stepIndex].inputs[inputIndex].horizontal = isCheckedHorizontal;
-                formData[stepIndex].inputs[inputIndex].vertical = isCheckedVertical;
-
-                if (isCheckedHorizontal) {
-                    inputDiv.addClass('horizontalSelected');
-                    inputDiv.removeClass('verticalSelected');
-                } else if (isCheckedVertical) {
-                    inputDiv.addClass('verticalSelected');
-                    inputDiv.removeClass('horizontalSelected');
-                } else {
-                    inputDiv.removeClass('horizontalSelected verticalSelected');
-                }
-
-                // ذخیره فرم
-                saveForm();
-            });
-
-            inputDiv.find('.input-type').on('change', function () {
-                const newType = $(this).val();
-                formData[stepIndex].inputs[inputIndex].type = $(this).val();
-
-                // Clear dynamic fields when type changes
-                inputDiv.find('.dynamic-fields').remove();
-
-                // Remove any existing repeater to avoid duplicates
-                inputDiv.find('.radio-repeater').remove();
-                inputDiv.find('.checkbox-repeater').remove();
-                if (newType === 'radio_group') {
-                    const repeater = $('<div class="radio-repeater"></div>');
-
-                    const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
-                    const horizontalVerticalRadio = $(`
-                    <div class="horizVertparent">
-                        <label>افقی</label>
-                        <input class="horizontal-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.horizontal ? 'checked' : ''} value="horizontal" />
-                        <label>عمودی</label>
-                        <input class="vertical-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.vertical ? 'checked' : ''} value="vertical" />
-                    </div>
-                    `)
-                    horizontalVerticalRadio.find('.horizVert').on('change', function () {
-                        const value = $(this).val(); // دریافت مقدار انتخاب شده
-                        formData[stepIndex].inputs[inputIndex].horizontal = (value === 'horizontal');
-                        formData[stepIndex].inputs[inputIndex].vertical = (value === 'vertical');
-
-                        // ذخیره فرم
-                        saveForm();
-                    });
-                    horizontalVerticalRadio.insertBefore(repeater);
-                    addOptionBtn.on('click', function () {
-                        const newOptionDiv = $(`
-                            <div class="radio-item">
-                                <input type="radio" disabled>
-                                <input type="text" value="" class="radio-option" placeholder="Option ${repeater.find('.radio-item').length + 1}">
-                                <button type="button" class="delete-option">X</button>
-                            </div>
-                        `);
-                        repeater.append(newOptionDiv);
-
-                        // Save options immediately
-                        const options = [];
-                        repeater.find('.radio-option').each(function () {
-                            const value = $(this).val().trim();
-                            if (value !== '') {
-                                options.push(value);
-                            }
-                        });
-                        formData[stepIndex].inputs[inputIndex].options = options;
-                        saveForm();
-                    });
-
-                    repeater.append(addOptionBtn);
-
-                    // Delete Option Event
-                    repeater.on('click', '.delete-option', function () {
-                        $(this).closest('.radio-item').remove();
-                        const options = [];
-                        repeater.find('.radio-option').each(function () {
-                            const value = $(this).val().trim();
-                            if (value !== '') {
-                                options.push(value);
-                            }
-                        });
-                        formData[stepIndex].inputs[inputIndex].options = options;
-                        saveForm();
-                    });
-
-                    // Input Event to Save Options
-                    repeater.on('input', '.radio-option', function () {
-                        const options = [];
-                        repeater.find('.radio-option').each(function () {
-                            const value = $(this).val().trim();
-                            if (value !== '') {
-                                options.push(value);
-
-                            }
-                        });
-                        formData[stepIndex].inputs[inputIndex].options = options;
-                        saveForm();
-                    });
-
-                    // Append the repeater to the input container
-                    inputDiv.append(repeater);
-                }
-                if (newType === 'checkbox_group') {
-                    const repeater = $('<div class="checkbox-repeater"></div>');
-                    const horizontalVertical = $(`
-                        <div class="horizVertparent">
-                            <label>افقی</label>
-                            <input class="horizontal-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.horizontal ? 'checked' : ''} value="horizontal" />
-                            <label>عمودی</label>
-                            <input class="vertical-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.vertical ? 'checked' : ''} value="vertical" />
-                        </div>
-                        `);
-                    horizontalVertical.find('.horizVert').on('change', function () {
-                        const value = $(this).val(); // دریافت مقدار انتخاب شده
-                        formData[stepIndex].inputs[inputIndex].horizontal = (value === 'horizontal');
-                        formData[stepIndex].inputs[inputIndex].vertical = (value === 'vertical');
-
-                        // ذخیره فرم
-                        saveForm();
-                    });
-                    horizontalVertical.insertBefore(repeater);
-                    // Add Option Button
-                    const addOptionBtn = $('<button type="button" class="add-option">+ Add Option</button>');
-                    addOptionBtn.on('click', function () {
-                        let options = [];
-                        const uniqueId = `ck-${stepIndex}-${inputIndex}-${options.length + 1}`;
-                        options.push({ id: uniqueId, value: '' });
-                        const newOptionDiv = $(`
-                            <div class="checkbox-item">
-                                <input type="text" value="" class="checkbox-option" placeholder="Option ${repeater.find('.checkbox-item').length + 1}">
-                                <span class="checkbox-id uniqueid-checkbox">${uniqueId}</span>
-                                <button type="button" class="delete-option">X</button>
-                            </div>
-                        `);
-
-                        repeater.append(newOptionDiv);
-
-                        // Save changes immediately
-
-                        repeater.find('.checkbox-option').each(function () {
-                            const value = $(this).val().trim();
-                            if (value !== '') {
-                                options.push(value);
-                            }
-                        });
-                        formData[stepIndex].inputs[inputIndex].options = options;
-
-                        saveForm();
-                    });
-
-                    repeater.append(addOptionBtn);
-                    inputDiv.append(repeater);
-
-
-                    repeater.on('input', '.checkbox-option', function () {
-                        const options = [];
-                        repeater.find('.checkbox-option').each(function () {
-                            options.push($(this).val().trim());
-                        });
-                        $(this).closest('.checkbox-repeater').find('.checkbox-option').each(function () {
-                            options.push($(this).val().trim());
-                        });
-                        formData[stepIndex].inputs[inputIndex].options = options;
-                        saveForm();
-                    });
-                    // Restore saved options during re-render
-                    const options = formData[stepIndex].inputs[inputIndex].options || [];
-                    const horizontalVertical1 = $(`
-                    <div class="horizVertparent">
-                        <label>افقی</label>
-                        <input class="horizontal-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.horizontal ? 'checked' : ''} value="horizontal" />
-                        <label>عمودی</label>
-                        <input class="vertical-checkbox horizVert" type="radio" name="orientation-${stepIndex}-${inputIndex}" ${input.vertical ? 'checked' : ''} value="vertical" />
-                    </div>
-                    `)
-                    horizontalVertical1.find('.horizVert').on('change', function () {
-                        const value = $(this).val(); // دریافت مقدار انتخاب شده
-                        formData[stepIndex].inputs[inputIndex].horizontal = (value === 'horizontal');
-                        formData[stepIndex].inputs[inputIndex].vertical = (value === 'vertical');
-
-                        // ذخیره فرم
-                        saveForm();
-                    });
-                    options.forEach((option, index) => {
-                        const optionDiv = $(`
-                            <div class="checkbox-item">
-                                <input type="text" value="${option}" class="checkbox-option" placeholder="Option ${index + 1}">
-                                
-                                <button type="button" class="delete-option">X</button>
-                            </div>
-                        `);
-                        repeater.append(optionDiv);
-                    });
-                    // Append the repeater below the input
-                    inputDiv.append(repeater); // اضافه کردن repeater به inputDiv
-                    horizontalVertical1.insertBefore(repeater);
-                }
-                saveForm();
-            });
-            container.append(inputDiv);
-        });
-    }
-    // Make Steps and Inputs Sortable
-    function makeSortable() {
-        if (typeof Sortable !== 'undefined') {
-            Sortable.create(formBuilder[0], {
-                animation: 150,
-                onEnd: function (evt) {
-                    const item = formData.splice(evt.oldIndex, 1)[0];
-                    formData.splice(evt.newIndex, 0, item);
-                    saveForm();
-                }
-            });
-
-            $('.inputs').each(function () {
-                Sortable.create(this, {
-                    animation: 150,
-                    group: 'inputs',
-                    onEnd: function (evt) {
-                        const stepIndex = $(evt.from).data('step-index');
-                        const item = formData[stepIndex].inputs.splice(evt.oldIndex, 1)[0];
-                        formData[stepIndex].inputs.splice(evt.newIndex, 0, item);
-                        saveForm();
-                    }
-                });
-            });
+    $(document).on('click','#remove-step', function () {
+        updateFormData();
+        let currentStep = parseInt($(this).closest('.step').attr('data-step-index'),10);
+        formData.splice(currentStep, 1);
+        renderAdminForm(formData);
+    });
+    $(document).on('click','#remove-input', function () {
+        updateFormData();
+        let currentStep = parseInt($(this).closest('.step').attr('data-step-index'),10);
+        let currentInput = parseInt($(this).closest('.input').attr('data-input-index'),10);
+        formData[currentStep].inputs.splice(currentInput, 1);
+        renderAdminForm(formData);
+    });
+    $(document).on('click','#add-input-field', function () {
+        updateFormData();
+        let currentStep = parseInt($(this).closest('.step').attr('data-step-index'),10);
+        const newInput = {type: 'text',name: 'فیلد',placeholder: '',isRequired: false,options: [],width: 'half' , logics:[{maxchar:'',maxnum:'',minchar: '',minnum: ''}]}
+        formData[currentStep].inputs.push(newInput);
+        renderAdminForm(formData);
+    });
+    $(document).on('click','#add-option', function () {
+        updateFormData();
+        let currentStep = parseInt($(this).closest('.step').attr('data-step-index'),10);
+        let currentInput = parseInt($(this).closest('.input').attr('data-input-index'),10);
+        const newoption = {name:'گزینه'};
+        formData[currentStep].inputs[currentInput].options.push(newoption);
+        renderAdminForm(formData);
+    });
+    $('#publish').on('click', function (e) {
+        e.preventDefault();
+        updateFormData();
+        $('#sproduct_form_data').val(JSON.stringify(formData));
+        $(this).off('click');
+        $(this).click();
+    });
+    $(document).on('change','.input-type',function(){
+        updateFormData();
+        let selectedType = $(this).val();
+        let selectedStep = $(this).closest('.step');
+        let selectedStepIndex = selectedStep.attr('data-step-index');
+        let selectedInput = $(this).closest('.input');
+        let selectedInputIndex = selectedInput.attr('data-input-index');
+        formData[selectedStepIndex].inputs[selectedInputIndex].type = selectedType;
+        if(selectedType == 'radio' || selectedType == 'checkbox'){
+            selectedInput.find('.logic-input-container').html('');
+            let optionContainerInner = '<div class="options"></div><div id="add-option" class="button-primary add-option">+ گزینه</div>';
+            selectedInput.find('.input-option-container').html(optionContainerInner);
         }
-    }
-    function saveForm() {
-        $('.step').each(function (stepIndex) {
-            $(this).find('.input-item').each(function (inputIndex) {
-                const inputType = $(this).find('.input-type').val();
-                formData[stepIndex].inputs[inputIndex].type = inputType;
-
-                if (inputType === 'checkbox_group') {
-                    // Save options for checkbox_group
-                    const options = [];
-                    $(this).find('.checkbox-option').each(function () {
-                        const value = $(this).val().trim();
-                        if (value !== '') { // Avoid saving empty options
-                            options.push(value);
-                        }
-                    });
-                    formData[stepIndex].inputs[inputIndex].options = options; // Save cleaned options
-                }
-                if (inputType === 'radio_group') {
-                    const options = [];
-                    $(this).find('.radio-option').each(function () {
-                        const value = $(this).val().trim();
-                        if (value !== '') { // Avoid saving empty options
-                            options.push(value);
-                        }
-                    });
-                    formData[stepIndex].inputs[inputIndex].options = options;
-                }
-                // Ensure IDs for date inputs are not lost or empty
-                if (inputType === 'date' && !formData[stepIndex].inputs[inputIndex].id) {
-                    const stepIndex = $(this).closest('.step').data('step-index'); // Get the step index
-                    const inputIndex = formData[stepIndex].inputs.length; // Get the current input index within the step
-
-                    formData[stepIndex].inputs[inputIndex].id = `datepicker${stepIndex}${inputIndex}`;
-                }
-            });
-        });
-
-        hiddenInput.val(JSON.stringify(formData)); // Save to hidden input for persistence
-    }
-    $('form').on('submit', function () {
-        saveForm();
+        else{
+            selectedInput.find('.logic-input-container').html('');
+            let inputLogicHTML = operateInputLogicHTML(selectedType);
+            selectedInput.find('.logic-input-container').html(inputLogicHTML);
+        }
     });
-
+    $(document).on('focus' , '.step input[type=text]' , function(){
+        let tempVal = $(this).val();
+        $(this).val('');
+        $(this).val(tempVal);
+    });
 });
