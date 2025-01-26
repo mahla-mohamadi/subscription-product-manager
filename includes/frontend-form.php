@@ -2,6 +2,9 @@
 // Inject Form into Single sproduct Posts
 function sproduct_display_form_on_single($content)
 {
+    if(!is_singular('sproduct')){
+        return $content;
+    }
     if (is_singular('sproduct') && in_the_loop() && is_main_query()) {
         global $post;
         $form_data = get_post_meta($post->ID, '_sproduct_form_data', true);
@@ -14,7 +17,7 @@ function sproduct_display_form_on_single($content)
     $plans = maybe_unserialize($plans);  // Ensure proper decoding
     $textInputs = ['text','email','number','nationalcode','postcode','datepicker'];
     ob_start();
-    echo '<div class="sproductStepContainer">';
+    echo '<div class="sproductStepContainer" data-post-id="'.esc_attr($post->ID).'">';
     foreach($form_data as $step){
         // echo '<pre>';
         // print_r($step);
