@@ -225,21 +225,14 @@ function edit_subscription_page_callback(){
                 $subscription_id
             )
         );
-        
-        // $user_info = $wpdb->get_results(
-        //     $wpdb->prepare(
-        //         "SELECT meta_key, meta_value 
-        //          FROM wp_usermeta 
-        //          WHERE user_id = %d AND meta_key IN ('first_name', 'last_name')",
-        //         $subscription->user_id
-        //     ),
-        //     OBJECT_K
-        // );
         $fullUserName = get_user_meta( $subscription->user_id, 'first_name', true ).' '.get_user_meta( $subscription->user_id, 'last_name', true );
         if ($subscription) {
-            $jalali_start_date = convert_to_jalali($subscription->start_date);
-            $jalali_end_date = convert_to_jalali($subscription->end_date);
+            $subscription_start_date = $subscription->start_date;
+            $subscription_end_date = $subscription->end_date;
+            $jalali_start_date = convert_to_jalali($subscription_start_date);
+            $jalali_end_date = convert_to_jalali($subscription_end_date);
             $sproductName = get_the_title($subscription->sproduct_id);
+            $formData = json_decode(stripslashes($subscription->formdata),true);
             if (esc_html($subscription->status) == "active") {
                 $statusBadge = '<span style="background-color: #d2ffc9;padding: 3px 10px;border-radius: 2px;color: #384a34;border: 1px solid #bceeb2;">فعال</span>';
             } else {
@@ -256,10 +249,23 @@ function edit_subscription_page_callback(){
             echo "<p>تاریخ پایان: {$jalali_end_date}</p>";
             echo "<p>هزینه تمدید: {$subscription->amount} تومان</p>";
             echo "<p>وضعیت: {$statusBadge}</p>";
-            // Fetch subscription start and end dates
-            $subscription_start_date = $subscription->start_date;
-            $subscription_end_date = $subscription->end_date;
-            // Display WooCommerce orders for the user
+            if ($formData && is_array($formData)) {
+                echo '<table border="1" style="border-collapse: collapse; width: 100%;">';
+                echo '<tr><th>Field</th><th>Value</th></tr>';
+                foreach ($formData as $key => $value) {
+                    echo '<tr>';
+                    echo '<td>' . esc_html($key) . '</td>';
+                    if (is_array($value)) {
+                        echo '<td>' . esc_html(implode(', ', $value)) . '</td>';
+                    } else {
+                        echo '<td>' . esc_html($value) . '</td>'; // Field value
+                    }
+                    echo '</tr>';
+                }
+                echo '</table>';
+            } else {
+                echo 'No form data available.';
+            }
             echo "<h2>پرداخت‌های کاربر</h2>";
             $user_id = $subscription->user_id;
             $skus_to_search = ['s_prod_virtual', 'wallet_prod_virtual'];
@@ -276,76 +282,124 @@ function edit_subscription_page_callback(){
                 echo "<p>محصولات مجازی مخفی با این شناسه‌ها پیدا نشدند.</p>";
                 return;
             }
+            $meta_key = '_subscription_id';
+            $meta_value = $subscription->id;
+            $query = "
+                SELECT DISTINCT order_id
+                FROM {$wpdb->prefix}woocommerce_order_itemmeta AS oim
+                INNER JOIN {$wpdb->prefix}woocommerce_order_items AS oi
+                ON oim.order_item_id = oi.order_item_id
+                WHERE oim.meta_key = %s
+                AND oim.meta_value = %s
+            ";
+
+            $order_ids = $wpdb->get_col($wpdb->prepare($query, $meta_key, $meta_value));
             // Query WooCommerce orders
             // دریافت سفارش‌های کاربر
-            $customer_orders = wc_get_orders(array(
-                'customer_id' => $user_id,
-                'limit' => -1, // بدون محدودیت
-                'orderby' => 'date',
-                'order' => 'DESC',
-            ));
+            // $customer_orders = wc_get_orders(array(
+            //     'customer_id' => $user_id,
+            //     'limit' => -1, // بدون محدودیت
+            //     'orderby' => 'date',
+            //     'order' => 'DESC',
+            // ));
 
-            if ($customer_orders) {
-                echo "<table border='1' style='width:100%; text-align: center;'>";
-                echo "<tr>
-                        <th>سریال سفارش</th>
-                        <th>نام محصول</th>
-                        <th>مبلغ</th>
-                        <th>تاریخ</th>
-                    </tr>";
+            // if ($customer_orders) {
+            //     echo "<table border='1' style='width:100%; text-align: center;'>";
+            //     echo "<tr>
+            //             <th>سریال سفارش</th>
+            //             <th>نام محصول</th>
+            //             <th>مبلغ</th>
+            //             <th>تاریخ</th>
+            //         </tr>";
             
-                $orders_found = false; // Track if any relevant orders are found
+            //     $orders_found = false; // Track if any relevant orders are found
             
-                foreach ($customer_orders as $order) {
-                    $order_id = $order->get_id();
-                    $order_date = $order->get_date_created();
-                    $formatted_date = $order_date ? $order_date->date('Y-m-d') : '';
-                    $newDate = convert_to_jalali($formatted_date);
-                    $contains_virtual_product = false; // Flag to check if the order contains a virtual product
+            //     foreach ($customer_orders as $order) {
+            //         $order_id = $order->get_id();
+            //         $order_date = $order->get_date_created();
+            //         $formatted_date = $order_date ? $order_date->date('Y-m-d') : '';
+
+            //         // Check if the order date is within the subscription period
+            //         // if ($formatted_date > $subscription_end_date || $formatted_date <= $subscription_start_date) {
+            //         //     continue; // Skip orders outside the subscription period
+            //         // }
+
+            //         $newDate = convert_to_jalali($formatted_date);
+            //         $contains_virtual_product = false; // Flag to check if the order contains a virtual product
             
-                    // First pass: Check if the order contains any virtual product
-                    foreach ($order->get_items() as $item) {
-                        $product_id = $item->get_product_id();
-                        if (in_array($product_id, $hidden_virtual_product_ids)) {
-                            $contains_virtual_product = true;
-                            break; // Stop checking once a virtual product is found
-                        }
-                    }
+            //         // First pass: Check if the order contains any virtual product
+            //         foreach ($order->get_items() as $item) {
+            //             $product_id = $item->get_product_id();
+            //             if (in_array($product_id, $hidden_virtual_product_ids)) {
+            //                 $contains_virtual_product = true;
+            //                 break; // Stop checking once a virtual product is found
+            //             }
+            //         }
             
-                    // If the order contains a virtual product, display all products in the order
-                    if ($contains_virtual_product) {
-                        foreach ($order->get_items() as $item) {
-                            $product_id = $item->get_product_id();
-                            $product_name = $item->get_name(); // Get product name
-                            $item_total = $item->get_total(); // Get item's total price
-                            $product_sku = get_post_meta($product_id, '_sku', true);
+            //         // If the order contains a virtual product, display all products in the order
+            //         if ($contains_virtual_product) {
+            //             foreach ($order->get_items() as $item) {
+            //                 $product_id = $item->get_product_id();
+            //                 $product_name = $item->get_name(); // Get product name
+            //                 $item_total = $item->get_total(); // Get item's total price
+            //                 $product_sku = get_post_meta($product_id, '_sku', true);
             
-                            // Customize virtual product name if needed
-                            if (in_array($product_id, $hidden_virtual_product_ids)) {
-                                if ($product_sku === 's_prod_virtual') {
-                                    $product_name = "اشتراک {$subscription->plan}";
-                                }
-                            }
+            //                 // Customize virtual product name if needed
+            //                 if (in_array($product_id, $hidden_virtual_product_ids)) {
+            //                     if ($product_sku === 's_prod_virtual') {
+            //                         $product_name = "اشتراک {$subscription->plan}";
+            //                     }
+            //                 }
             
-                            // Mark as orders found and display the product
-                            $orders_found = true;
-                            echo "<tr>
-                                    <td>{$order_id}</td>
-                                    <td>{$product_name}</td>
-                                    <td>{$item_total} تومان</td>
-                                    <td>{$newDate}</td>
-                                </tr>";
-                        }
+            //                 // Mark as orders found and display the product
+            //                 $orders_found = true;
+            //                 echo "<tr>
+            //                         <td>{$order_id}</td>
+            //                         <td>{$product_name}</td>
+            //                         <td>{$item_total} تومان</td>
+            //                         <td>{$newDate}</td>
+            //                     </tr>";
+            //             }
+            //         }
+            //     }
+            
+            //     if (!$orders_found) {
+            //         echo "<tr><td colspan='4'>هیچ سفارشی با محصولات مجازی مورد نظر پیدا نشد.</td></tr>";
+            //     }
+            //     echo "</table>";
+            // } else {
+            //     echo "<p>این کاربر سفارشی ندارد.</p>";
+            // }
+            if (!empty($order_ids)) {
+                echo '<table border="1" style="border-collapse: collapse; width: 100%;">';
+                echo '<tr><th>Order ID</th><th>Paid Amount</th><th>Date</th></tr>';
+            
+                foreach ($order_ids as $order_id) {
+                    // Load the order object
+                    $order = wc_get_order($order_id);
+            
+                    if ($order) {
+                        // Get order details
+                        $order_date = $order->get_date_created(); // Date created
+                        $order_date_formatted = $order_date->date('Y-m-d H:i:s');
+                        $order_date_jalali = convert_to_jalali(explode(' ',$order_date_formatted)[0]);
+                        $paid_amount = $order->get_total();      // Total paid
+                        // Display order details in the table
+                        echo '<tr>';
+                        echo '<td>' . esc_html($order_id) . '</td>';
+                        echo '<td>' . wc_price($paid_amount) . '</td>';
+                        echo '<td>' . esc_html($order_date_jalali) . ' ساعت '.explode(' ',$order_date_formatted)[1].'</td>';
+                        echo '</tr>';
                     }
                 }
             
-                if (!$orders_found) {
-                    echo "<tr><td colspan='4'>هیچ سفارشی با محصولات مجازی مورد نظر پیدا نشد.</td></tr>";
-                }
-                echo "</table>";
+                echo '</table>';
             } else {
-                echo "<p>این کاربر سفارشی ندارد.</p>";
+                echo 'No orders found with the specified item meta.';
             }
+            
+
+
             // Add a form for editing if needed
             echo '<form method="post">';
             echo '<input type="hidden" name="edit_hidden_id" id="edit_hidden_id" value="'.esc_attr($subscription->id).'">';

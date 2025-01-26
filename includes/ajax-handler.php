@@ -140,7 +140,7 @@ function sproduct_create_subscription_on_order($order_id) {
                 'amount'      => $price,
                 'status'      => 'active',
             ),
-            array('%d', '%s' , '%d', '%s', '%s', '%s', '%d', '%s')
+            array('%d', '%s', '%d', '%s', '%s', '%s', '%s', '%d', '%s')
         );
         $subscription_id = $wpdb->insert_id;
         if ($subscription_id) {
