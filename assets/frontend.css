@@ -277,3 +277,88 @@ main#primary {
 }
 
 .verticalSelected {}
+
+.sproductSingleInput .daySelector{
+    width: 50px;
+}
+.sproductSingleInput .monthSelector{
+    width: 50px;
+}
+.sproductSingleInput .yearSelector{
+    width: 100px;
+}
+.sproductStepBody{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.sproduct-wrapper-half{
+    width: 48%;
+}
+.sproductSingleInput{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.sproduct-input{
+    width: 100%;
+    padding: 10px !important;
+}
+textarea.sproduct-input{
+    resize: none;
+    height: 120px;
+}
+.sproductLabel{
+    font-size: 14px;
+    margin-bottom: 3px;
+    margin-top: 20px;
+}
+.sproductSingleInputRadio input , .sproductSingleInputCheckbox input {
+    width: max-content;
+    margin-left: 5px;
+}
+.sproductSingleInputRadio , .sproductSingleInputCheckbox {
+    gap: 20px;
+}
+.sproduct-vertical{
+    flex-direction: column;
+    align-items: start;
+    gap: 5px;
+}
+.sproductStepBody .sproduct-input-file{
+    display: none;
+}
+.sproductStepBody .sproduct-input-file-button{
+    padding: 10px 20px;
+    display: block;
+    background-color: #009b8b;
+    color: #fff;
+    font-size: 14px;
+    border-radius: 5px;
+    margin: 20px 5px 3px 0;
+    cursor: pointer;
+}
+.sproductFormNavigator{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+.sproductFormButton{
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background-color: #009b8b;
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #fff;
+    cursor: pointer;
+}
+.sproductFormButtonPrev{
+    background-color: #cbcbcb;
+    color: #3e3e3e;
+}
+.sproductFormButton span.sproductFormButtonIcon{
+    width: 20px;
+    height: 20px;
+}

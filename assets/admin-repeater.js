@@ -6,19 +6,19 @@ jQuery(document).ready(function ($) {
     $('#add-plan').on('click', function () {
         const newPlan = `
             <div class="plan-item">
-                <label>Plan Name</label>
+                <label>نام</label>
                 <input type="text" name="sproduct_plans[${planCount}][name]" required />
 
-                <label>Days</label>
+                <label>مدت</label>
                 <input type="number" class="days-field" name="sproduct_plans[${planCount}][days]" required />
 
-                <label>Price</label>
+                <label>قیمت</label>
                 <input type="number" class="price-field" name="sproduct_plans[${planCount}][price]" required />
 
-                <label>Description</label>
+                <label>توضیحات</label>
                 <textarea name="sproduct_plans[${planCount}][description]"></textarea>
 
-                <button type="button" class="remove-plan button">Remove</button>
+                <button type="button" class="remove-plan button">حذف</button>
             </div>
         `;
         planRepeater.append(newPlan);
