@@ -105,15 +105,16 @@
     margin: 7px 0;
     flex-wrap: wrap;
     position: relative;
-    border-bottom: 1px solid #e6e6e6;
-    padding: 7px 0;
+    border: 1px solid rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 5px;
 }
 .step-input-container .input #remove-input{
     position: absolute;
     width: 20px;
     height: 20px;
-    top: 6px;
-    left: 0;
+    top: 7px;
+    left: 7px;
 }
 .step-input-container .input label{
     margin-left: 10px;
@@ -124,15 +125,40 @@
 .step-input-container .input .logic-input-container .logic{
     padding: 10px;
     width: 100%;
-    background-color: rgba(0,0,0,0.07);
     display: flex;
     align-items: center;
     justify-content: start;
     margin-top: 7px;
     flex-wrap: wrap;
 }
-.add-option{
-    margin-top: 10px !important;
+.add-input-field{
+    margin: 5px 0 30px 0 !important;
+}
+.input-option-container .options{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+}
+.input-option-container .options label{
+    position: relative;
+    display: block;
+}
+.input-option-container .options label span{
+    position: absolute;
+    color: red;
+    left: 5px;
+    font-size: 11px;
+    display: none;
+    top: 0;
+    bottom: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+    align-items: center;
+    cursor: pointer;
+}
+.input-option-container .options label:hover span{
+    display: flex;
 }
 /* .input-header select,
 .input-header input:not([type="checkbox"]),

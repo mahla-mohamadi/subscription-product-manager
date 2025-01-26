@@ -408,15 +408,15 @@ function sproduct_plan_repeater_callback($post)
             <?php if (!empty($plans)): ?>
                 <?php foreach ($plans as $index => $plan): ?>
                     <div class="plan-item">
-                        <label>نام طرح</label>
+                        <label>نام</label>
                         <input type="text" name="sproduct_plans[<?php echo $index; ?>][name]"
                             value="<?php echo esc_attr($plan['name'] ?? ''); ?>" required />
 
-                        <label>مدت طرح</label>
+                        <label>مدت</label>
                         <input type="number" class="days-field" name="sproduct_plans[<?php echo $index; ?>][days]"
                             value="<?php echo esc_attr($plan['days'] ?? ''); ?>" required />
 
-                        <label>قیمت طرح</label>
+                        <label>قیمت</label>
                         <input type="number" class="price-field" name="sproduct_plans[<?php echo $index; ?>][price]"
                             value="<?php echo esc_attr($plan['price'] ?? ''); ?>" required />
 

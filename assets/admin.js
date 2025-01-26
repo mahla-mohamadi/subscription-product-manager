@@ -35,12 +35,12 @@ jQuery(document).ready(function ($) {
             $.each(step.inputs , function(inputIndex,input){
                 stepContainer += '<div class="input" data-input-index="'+inputIndex+'">';
                 stepContainer += '<label><input type="checkbox" class="input-required"'+(input.isRequired?'checked':'')+'>ضروری</label>';
-                stepContainer += '<label>نوع<select class="input-type"><option value="text"'+(input.type=='text'?'selected':'')+'>متن</option><option value="email"'+(input.type=='email'?'selected':'')+'>ایمیل</option><option value="number"'+(input.type=='number'?'selected':'')+'>عدد</option><option value="birthday"'+(input.type=='birthday'?'selected':'')+'>تاریخ تولد</option><option value="datepicker"'+(input.type=='datepicker'?'selected':'')+'>انتخابگر تاریخ</option><option value="nationalcode"'+(input.type=='nationalcode'?'selected':'')+'>کد ملی</option><option value="postcode"'+(input.type=='postcode'?'selected':'')+'>کد پستی</option><option value="phonenumber"'+(input.type=='phonenumber'?'selected':'')+'>شماره همراه</option><option value="phone"'+(input.type=='phone'?'selected':'')+'>شماره ثابت</option><option value="textarea"'+(input.type=='textarea'?'selected':'')+'>ناحیه متنی</option><option value="radio"'+(input.type=='radio'?'selected':'')+'>انتخاب تکی</option><option value="checkbox"'+(input.type=='checkbox'?'selected':'')+'>انتخاب چندگانه</option><option value="file"'+(input.type=='file'?'selected':'')+'>فایل</option></select></label>';
+                stepContainer += '<label>نوع<select class="input-type"><option value="text"'+(input.type=='text'?'selected':'')+'>متن</option><option value="email"'+(input.type=='email'?'selected':'')+'>ایمیل</option><option value="number"'+(input.type=='number'?'selected':'')+'>عدد</option></option><option value="datepicker"'+(input.type=='datepicker'?'selected':'')+'>انتخابگر تاریخ</option><option value="nationalcode"'+(input.type=='nationalcode'?'selected':'')+'>کد ملی</option><option value="postcode"'+(input.type=='postcode'?'selected':'')+'>کد پستی</option><option value="phonenumber"'+(input.type=='phonenumber'?'selected':'')+'>شماره همراه</option><option value="phone"'+(input.type=='phone'?'selected':'')+'>شماره ثابت</option><option value="textarea"'+(input.type=='textarea'?'selected':'')+'>ناحیه متنی</option><option value="radio"'+(input.type=='radio'?'selected':'')+'>انتخاب تکی</option><option value="checkbox"'+(input.type=='checkbox'?'selected':'')+'>انتخاب چندگانه</option><option value="file"'+(input.type=='file'?'selected':'')+'>فایل</option></select></label>';
                 stepContainer += '<label>نام<input class="input-name" type="text" value="'+input.name+'"></label>';
                 stepContainer += '<label>نگهدارنده<input class="input-placeholder" type="text" value="'+input.placeholder+'"></label>';
                 stepContainer += '<label>عرض<select class="input-width"><option value="half"'+(input.width=='half'?'selected':'')+'>نیمه</option><option value="full"'+(input.width=='full'?'selected':'')+'>عریض</option></select></label>';
                 stepContainer += '<div class="logic-input-container">';
-                if(input.type=='text'||input.type=='number'){stepContainer += '<div class="logic">';}
+                if(input.type=='text'||input.type=='number' || input.type=='radio' || input.type=='checkbox'){stepContainer += '<div class="logic">';}
                 if(input.type == 'text'){
                     stepContainer += '<label>حداقل کاراکتر<input class="logic-min-char" type="number" value="'+input.logics[0].minchar+'"></label>';
                     stepContainer += '<label>حداکثر کاراکتر<input class="logic-max-char" type="number" value="'+input.logics[0].maxchar+'"></label>';
@@ -49,12 +49,13 @@ jQuery(document).ready(function ($) {
                     stepContainer += '<label>حداقل مقدار<input class="logic-min-num" type="number" value="'+input.logics[0].minnum+'"></label>';
                     stepContainer += '<label>حداکثر مقدار<input class="logic-max-num" type="number" value="'+input.logics[0].maxnum+'"></label>';
                 }
-                if(input.type=='text'||input.type=='number'){stepContainer += '</div>';}
+                else if(input.type=='radio' || input.type=='checkbox'){stepContainer+='<label><input type="checkbox" class="input-vertical"'+(input.isVertical?'checked':'')+'>نمایش عمودی</label>'}
+                if(input.type=='text'||input.type=='number' || input.type=='radio' || input.type=='checkbox'){stepContainer += '</div>';}
                 stepContainer += '</div>';
                 stepContainer += '<div class="input-option-container">';
                 if(input.type=='radio'||input.type=='checkbox'){stepContainer += '<div class="options">';}
                 $.each(input.options, function(optionIndex,option){
-                    stepContainer += '<label>گزینه<input class="option" type="text" value="'+option.name+'"></label>';
+                    stepContainer += '<label class="option" data-option-index="'+optionIndex+'">گزینه<input type="text" value="'+option.name+'"><span class="remove-option" id="remove-option">حدف</span></label>';
                 })
                 if(input.type=='radio'||input.type=='checkbox'){stepContainer += '<div id="add-option" class="button-primary add-option">+ گزینه</div>';}
                 if(input.type=='radio'||input.type=='checkbox'){stepContainer += '</div>';}
@@ -81,11 +82,13 @@ jQuery(document).ready(function ($) {
             $.each(step.find('.input'),function(){
                 let input = $(this);
                 let isInputRequired = input.find('.input-required').is(':checked');
+                let isInputVertical = input.find('.input-vertical').is(':checked');
                 let inputData = {
                     type: input.find('.input-type').val(),
                     name: input.find('.input-name').val(),
                     placeholder: input.find('.input-placeholder').val(),
                     isRequired: isInputRequired,
+                    isVertical: isInputVertical,
                     options: [],
                     width: input.find('.input-width').val(),
                     logics:[],
@@ -142,6 +145,14 @@ jQuery(document).ready(function ($) {
         formData[currentStep].inputs.splice(currentInput, 1);
         renderAdminForm(formData);
     });
+    $(document).on('click','#remove-option', function () {
+        updateFormData();
+        let currentStep = parseInt($(this).closest('.step').attr('data-step-index'),10);
+        let currentInput = parseInt($(this).closest('.input').attr('data-input-index'),10);
+        let currentOption = parseInt($(this).closest('.option').attr('data-option-index'),10);
+        formData[currentStep].inputs[currentInput].options.splice(currentOption, 1);
+        renderAdminForm(formData);
+    });
     $(document).on('click','#add-input-field', function () {
         updateFormData();
         let currentStep = parseInt($(this).closest('.step').attr('data-step-index'),10);
@@ -155,6 +166,7 @@ jQuery(document).ready(function ($) {
         let currentInput = parseInt($(this).closest('.input').attr('data-input-index'),10);
         const newoption = {name:'گزینه'};
         formData[currentStep].inputs[currentInput].options.push(newoption);
+        console.log(formData);
         renderAdminForm(formData);
     });
     $('#publish').on('click', function (e) {
@@ -173,7 +185,7 @@ jQuery(document).ready(function ($) {
         let selectedInputIndex = selectedInput.attr('data-input-index');
         formData[selectedStepIndex].inputs[selectedInputIndex].type = selectedType;
         if(selectedType == 'radio' || selectedType == 'checkbox'){
-            selectedInput.find('.logic-input-container').html('');
+            selectedInput.find('.logic-input-container').html('<div class="logic"><label><input type="checkbox" class="input-vertical">نمایش عمودی</label></div>');
             let optionContainerInner = '<div class="options"></div><div id="add-option" class="button-primary add-option">+ گزینه</div>';
             selectedInput.find('.input-option-container').html(optionContainerInner);
         }
