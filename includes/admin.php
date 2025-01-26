@@ -1,4 +1,61 @@
 <?php
+
+
+
+
+// Schedule the cron job for midnight daily.
+function schedule_subscription_status_check() {
+    if (!wp_next_scheduled('check_subscription_status')) {
+        // Schedule the event to run daily at midnight.
+        wp_schedule_event(strtotime('00:00:00'), 'daily', 'check_subscription_status');
+    }
+}
+add_action('wp', 'schedule_subscription_status_check');
+
+// Clear the cron event upon plugin/theme deactivation.
+function clear_subscription_status_check() {
+    $timestamp = wp_next_scheduled('check_subscription_status');
+    if ($timestamp) {
+        wp_unschedule_event($timestamp, 'check_subscription_status');
+    }
+}
+register_deactivation_hook(__FILE__, 'clear_subscription_status_check');
+
+
+
+
+function update_subscription_status() {
+    global $wpdb;
+
+    // Define the table name (use the appropriate table prefix).
+    $table_name = $wpdb->prefix . 's_subscriptions';
+
+    // Get the current date in the correct format.
+    $today_date = current_time('mysql'); // Outputs 'YYYY-MM-DD HH:MM:SS'.
+
+    // Update the status of subscriptions where end_date has passed and the status is 'active'.
+    $result = $wpdb->query(
+        $wpdb->prepare(
+            "UPDATE $table_name 
+            SET status = %s 
+            WHERE end_date < %s 
+            AND status = %s",
+            'deactive', // New status value.
+            $today_date, // Compare against the current date.
+            'active' // Old status value.
+        )
+    );
+
+    // Debugging: Log the query result (optional).
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log('Subscription status update result: ' . $result);
+    }
+}
+add_action('check_subscription_status', 'update_subscription_status');
+
+
+
+
 function convert_to_jalali($gregorian_date) {
     require_once SPRODUCT_PATH . 'lib/jalali-3.4.2/src/Jalalian.php';
     if (!$gregorian_date) {
@@ -55,7 +112,7 @@ function subscriptions_page_callback(){
     global $wpdb;
     $table_name = $wpdb->prefix . 's_subscriptions';
     $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
-    $per_page = 1; // Number of rows per page
+    $per_page = 2; // Number of rows per page
     $offset = ($paged - 1) * $per_page;
     $orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'id';
     $order = isset($_GET['order']) && strtolower($_GET['order']) === 'asc' ? 'ASC' : 'DESC';
@@ -189,13 +246,19 @@ function edit_subscription_page_callback(){
                 $statusBadge = '<span style="background-color: #ffc9c9;padding: 3px 10px;border-radius: 2px;color: #4a3434;border: 1px solid #eeb2b2;" class="DeactiveButton">غیر فعال</span>';
             }
             echo "<h1>ویرایش اشتراک</h1>";
-            echo "<p>اشتراک {$subscription->plan} {$fullUserName} ({$subscription->remaining_days} روز باقی مانده)</p>";
+            if (esc_html($subscription->status) == "active") {
+                echo "<p>اشتراک {$subscription->plan} {$fullUserName} ({$subscription->remaining_days} روز باقی مانده)</p>";
+            } else {
+                echo "<p>اشتراک در وضعیت تعلیق قرار دارد</p>";
+            }
             echo "<p>نام سرویس: {$sproductName}</p>";
             echo "<p>تاریخ شروع: {$jalali_start_date}</p>";
             echo "<p>تاریخ پایان: {$jalali_end_date}</p>";
             echo "<p>هزینه تمدید: {$subscription->amount} تومان</p>";
             echo "<p>وضعیت: {$statusBadge}</p>";
-
+            // Fetch subscription start and end dates
+            $subscription_start_date = $subscription->start_date;
+            $subscription_end_date = $subscription->end_date;
             // Display WooCommerce orders for the user
             echo "<h2>پرداخت‌های کاربر</h2>";
             $user_id = $subscription->user_id;
@@ -226,40 +289,62 @@ function edit_subscription_page_callback(){
                 echo "<table border='1' style='width:100%; text-align: center;'>";
                 echo "<tr>
                         <th>سریال سفارش</th>
-                        <th>اقدام</th>
+                        <th>نام محصول</th>
                         <th>مبلغ</th>
                         <th>تاریخ</th>
                     </tr>";
-                    $orders_found = false; // Track if any orders match the criteria
+            
+                $orders_found = false; // Track if any relevant orders are found
+            
                 foreach ($customer_orders as $order) {
                     $order_id = $order->get_id();
                     $order_date = $order->get_date_created();
-                    // $order_status = $order->get_status();
-                    $order_total = $order->get_total(); // Get the total price of the order
                     $formatted_date = $order_date ? $order_date->date('Y-m-d') : '';
+
+                    // Check if the order date is within the subscription period
+                    if ($formatted_date > $subscription_end_date || $formatted_date <= $subscription_start_date) {
+                        continue; // Skip orders outside the subscription period
+                    }
+
                     $newDate = convert_to_jalali($formatted_date);
-                    // Check if the order contains any of the hidden virtual products
-                    $contains_hidden_virtual_product = false;
-                    $product_names = []; // Store product names for the matching products
+                    $contains_virtual_product = false; // Flag to check if the order contains a virtual product
+            
+                    // First pass: Check if the order contains any virtual product
                     foreach ($order->get_items() as $item) {
-                        if (in_array($item->get_product_id(), $hidden_virtual_product_ids)) {
-                            $contains_hidden_virtual_product = true;
-                            $product_names[] = $item->get_name(); // Add product name to the list
-                            break;
+                        $product_id = $item->get_product_id();
+                        if (in_array($product_id, $hidden_virtual_product_ids)) {
+                            $contains_virtual_product = true;
+                            break; // Stop checking once a virtual product is found
                         }
                     }
-                    // Display the order only if it contains one of the hidden virtual products
-                    if ($contains_hidden_virtual_product) {
-                        $orders_found = true;
-                        $product_names_string = implode(', ', $product_names); // Combine product names
-                        echo "<tr>
-                                <td>{$order_id}</td>
-                                <td>{$product_names_string}</td>
-                                <td>{$order_total} تومان</td>
-                                <td>{$newDate}</td>
-                            </tr>";
+            
+                    // If the order contains a virtual product, display all products in the order
+                    if ($contains_virtual_product) {
+                        foreach ($order->get_items() as $item) {
+                            $product_id = $item->get_product_id();
+                            $product_name = $item->get_name(); // Get product name
+                            $item_total = $item->get_total(); // Get item's total price
+                            $product_sku = get_post_meta($product_id, '_sku', true);
+            
+                            // Customize virtual product name if needed
+                            if (in_array($product_id, $hidden_virtual_product_ids)) {
+                                if ($product_sku === 's_prod_virtual') {
+                                    $product_name = "اشتراک {$subscription->plan}";
+                                }
+                            }
+            
+                            // Mark as orders found and display the product
+                            $orders_found = true;
+                            echo "<tr>
+                                    <td>{$order_id}</td>
+                                    <td>{$product_name}</td>
+                                    <td>{$item_total} تومان</td>
+                                    <td>{$newDate}</td>
+                                </tr>";
+                        }
                     }
                 }
+            
                 if (!$orders_found) {
                     echo "<tr><td colspan='4'>هیچ سفارشی با محصولات مجازی مورد نظر پیدا نشد.</td></tr>";
                 }
@@ -267,6 +352,8 @@ function edit_subscription_page_callback(){
             } else {
                 echo "<p>این کاربر سفارشی ندارد.</p>";
             }
+            
+            
 
 
             // Add a form for editing if needed

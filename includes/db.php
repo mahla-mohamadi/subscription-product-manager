@@ -14,7 +14,7 @@ function sproduct_create_db_tables() {
             plan TEXT NOT NULL,
             amount INT NOT NULL,
             formdata TEXT NOT NULL,
-            status VARCHAR(20) NOT NULL DEFAULT 'active',
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id)
