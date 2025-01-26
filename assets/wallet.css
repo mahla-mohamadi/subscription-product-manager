@@ -1,0 +1,76 @@
+.walletParent{
+    display: flex;
+    align-items: start;
+    justify-content: start;
+    gap: 50px;
+    flex-wrap: wrap;
+}
+.walletRightPart{
+    display: flex;
+    flex-direction: column;
+}
+.walletMainTitle{
+    width: 100%;
+    background-color: #009b8b;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 30px;
+}
+.walletMainTitle h2{
+    font-size: 18px;
+    color: #fff;
+    font-weight: 800;
+    margin: 0;
+}
+.walletMainTitle h3 , .walletMainTitle p{
+    margin: 0;
+    color: #fff;
+    font-size: 16px;
+}
+.walletRightPart{
+    width: 60%;
+    border-radius: 10px;
+}
+.walletRightPart *{
+    margin: 0;
+}
+.walletRightPart h4{
+    margin-bottom: 15px;
+}
+.walletTopUp{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 30%;
+    background-color: #e7fdfb;
+    padding: 30px 10px;
+    align-self: stretch;
+    border-radius: 10px;
+    border: 1px solid #009b8b;
+    gap: 10px;
+}
+.walletTopUp input{
+    border: 1px solid #0fe4cf !important;
+    padding: 10px 7PX !important;
+    border-radius: 5px !important;
+    transition: all .4s;
+}
+.walletTopUp input:focus{
+    outline: none;
+    border: 1px solid #009b8b !important;
+}
+.walletTopUp button{
+    padding: 15px 7px;
+    border-radius: 5px;
+    border: none;
+    background-color: #009b8b;
+    color: #fff;
+    cursor: pointer;
+    transition: all .4s;
+}
+.walletTopUp button:hover{
+    background-color: #027166;
+}

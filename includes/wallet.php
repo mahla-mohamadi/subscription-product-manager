@@ -8,6 +8,7 @@ function enqueue_wallet_scripts() {
         null,
         true
     );
+    wp_enqueue_style('wallet-css', SPRODUCT_URL . 'assets/wallet.css');
 
     // Localize script to pass the AJAX URL
     wp_localize_script('wallet-js', 'wallet_vars', [
@@ -63,28 +64,6 @@ function add_custom_wallet_virtual_product_to_cart($price) {
     return WC()->cart->add_to_cart($product_id, 1, 0, array(), $cart_item_data);
 }
 
-//این دیگه تو کیف پول ajax نمیشه البته و باید تغییرش بدم
-// Handle Form Submission via AJAX
-// add_action('wp_ajax_sproduct_submit_form', 'sproduct_submit_form');
-// add_action('wp_ajax_nopriv_sproduct_submit_form', 'sproduct_submit_form');
-// function sproduct_submit_form() {
-//     check_ajax_referer('sproduct_form_nonce', 'nonce');
-//     $planName  = isset($_POST['planName']) ? sanitize_text_field($_POST['planName']) : '';
-//     $postID  = isset($_POST['postID']) ? sanitize_text_field($_POST['postID']) : '';
-//     $productName = get_the_title($postID);
-//     $planPrice  = isset($_POST['planPrice']) ? sanitize_text_field($_POST['planPrice']) : '';
-//     $planDuration  = isset($_POST['planDuration']) ? sanitize_text_field($_POST['planDuration']) : '';
-//     $requestType  = isset($_POST['requestType']) ? sanitize_text_field($_POST['requestType']) : '';
-//     $submittedFormData  = isset($_POST['submittedFormData']) ? sanitize_text_field($_POST['submittedFormData']) : '';
-//     $cart_item_key = add_custom_virtual_product_to_cart($productName , $planName, $planPrice , $planDuration , $requestType , $submittedFormData);
-//     if($cart_item_key){
-//         wp_send_json_success(['added'=>1]);
-//     }
-//     else{
-//         wp_send_json_error(['added'=>0]);
-//     }
-// }
-//این دیگه تو کیف پول ajax نمیشه البته و باید تغییرش بدم
 
 
 function process_top_up_wallet() {
@@ -149,7 +128,14 @@ add_action('edit_user_profile_update', 'add_wallet_balance_to_user');
 
 // Add a Wallet menu item to My Account
 function add_wallet_to_my_account_menu($items) {
-    $items['wallet'] = __('Wallet Balance', 'woocommerce');
+    $items['wallet'] = __('کیف پول', 'woocommerce');
+    // بازسازی ترتیب منو
+    if (isset($items['customer-logout'])) {
+        $logout = $items['customer-logout'];
+        unset($items['customer-logout']); // حذف موقت آیتم خروج
+    }
+    // افزودن آیتم کیف پول قبل از خروج
+    $items['customer-logout'] = $logout;
     return $items;
 }
 add_filter('woocommerce_account_menu_items', 'add_wallet_to_my_account_menu');
@@ -160,37 +146,27 @@ function register_wallet_endpoint() {
 }
 add_action('init', 'register_wallet_endpoint');
 
-// Wallet Balance endpoint content
-// function wallet_balance_endpoint_content() {
-//     $user_id = get_current_user_id();
-//     $balance = get_user_meta($user_id, 'wallet_balance', true) ?: 0;
-//     echo '<h3>' . __('Your Wallet Balance:', 'woocommerce') . '</h3>';
-//     echo '<p>' . wc_price($balance) . '</p>';
-//     echo '<form method="post">';
-//     echo '<input type="number" name="top_up_amount" min="1" placeholder="Amount to Add" required />';
-//     echo '<button type="submit" name="top_up_wallet">' . __('Top Up Wallet', 'woocommerce') . '</button>';
-//     echo '</form>';
-//     if (isset($_POST['top_up_wallet'])) {
-//         $amount = floatval($_POST['top_up_amount']);
-//         if ($amount > 0) {
-//             update_user_meta($user_id, 'wallet_balance', $balance + $amount);
-//             wc_add_notice(__('Wallet topped up successfully!', 'woocommerce'), 'success');
-//         }
-//     }
-// }
-// add_action('woocommerce_account_wallet_endpoint', 'wallet_balance_endpoint_content');
+
 function wallet_balance_endpoint_content() {
     $user_id = get_current_user_id();
     $balance = get_user_meta($user_id, 'wallet_balance', true) ?: 0;
-    
-    echo '<h3>' . __('Your Wallet Balance:', 'woocommerce') . '</h3>';
-    echo '<p>' . wc_price($balance) . '</p>';
-    echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
+    echo '<div class="walletParent">';
+    echo '<div class="walletMainTitle">';
+    echo '<h2>کیف پول الکترونیک</h2>';
+    echo '<h3>' . __('موجودی کیف پول شما: ', 'woocommerce');
+    echo  wc_price($balance)  . '</h3>';
+    echo '</div>';
+    echo '<div class="walletRightPart">';
+    echo '<h4>افزایش موجودی کیف پولی</h4>';
+    echo '<p>برای افزایش موجودی کیف پول خود کافی‌ست مبلغ را به تومان وارد کنید و به درگاه پرداخت وارد شوید، مبلغ پرداختی به موجودی کیف پول الکترونیک شما اضافه می‌شود.</p>';
+    echo '</div>';
+    echo '<form class="walletTopUp" method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
     echo '<input type="hidden" name="action" value="top_up_wallet">';
-    echo '<input type="number" name="top_up_amount" min="1" placeholder="Amount to Add" required />';
+    echo '<input type="number" name="top_up_amount" min="1" placeholder="مبلغ اعتبار" required />';
     wp_nonce_field('top_up_wallet_nonce', 'top_up_wallet_nonce_field');
-    echo '<button type="submit">' . __('Top Up Wallet', 'woocommerce') . '</button>';
+    echo '<button type="submit">' . __('افزایش شارژ کیف پول', 'woocommerce') . '</button>';
     echo '</form>';
+    echo '</div>';
 }
 add_action('woocommerce_account_wallet_endpoint', 'wallet_balance_endpoint_content');
 
@@ -321,14 +297,14 @@ function add_wallet_usage_checkbox() {
 
     ?>
     <tr class="wallet-usage">
-        <th><?php _e('Use Wallet Credit', 'woocommerce'); ?></th>
+        <th><?php _e('پرداخت از کیف پول', 'woocommerce'); ?></th>
         <td>
             <input type="checkbox" id="use_wallet_credit" name="use_wallet_credit" value="1"
                 <?php checked(WC()->session->get('use_wallet_credit'), '1'); ?>>
             <label for="use_wallet_credit">
                 <?php 
                 printf(
-                    __('Apply wallet credit to this order. (Current Balance: %s)', 'woocommerce'), 
+                    __('اعتبار کیف پول را برای این سفارش اعمال کنید. (موجودی فعلی: %s)', 'woocommerce'), 
                     wc_price($wallet_balance)
                 ); 
                 ?>
@@ -355,9 +331,6 @@ function toggle_wallet_usage() {
 
     wp_send_json_success(['message' => 'Wallet usage updated.']);
 }
-
-
-
 
 
 add_action('woocommerce_checkout_order_processed', 'update_wallet_balance_after_order', 10, 1);

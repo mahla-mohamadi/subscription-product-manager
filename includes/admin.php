@@ -300,12 +300,6 @@ function edit_subscription_page_callback(){
                     $order_id = $order->get_id();
                     $order_date = $order->get_date_created();
                     $formatted_date = $order_date ? $order_date->date('Y-m-d') : '';
-
-                    // Check if the order date is within the subscription period
-                    if ($formatted_date > $subscription_end_date || $formatted_date <= $subscription_start_date) {
-                        continue; // Skip orders outside the subscription period
-                    }
-
                     $newDate = convert_to_jalali($formatted_date);
                     $contains_virtual_product = false; // Flag to check if the order contains a virtual product
             
@@ -352,10 +346,6 @@ function edit_subscription_page_callback(){
             } else {
                 echo "<p>این کاربر سفارشی ندارد.</p>";
             }
-            
-            
-
-
             // Add a form for editing if needed
             echo '<form method="post">';
             echo '<input type="hidden" name="edit_hidden_id" id="edit_hidden_id" value="'.esc_attr($subscription->id).'">';

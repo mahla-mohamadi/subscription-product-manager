@@ -45,7 +45,7 @@ function custom_page_content()
 
     $table_name = $wpdb->prefix . 's_subscriptions';
     $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
-    $per_page = 1; // Number of rows per page
+    $per_page = 3; // Number of rows per page
     $offset = ($paged - 1) * $per_page;
     $orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'id';
     $order = isset($_GET['order']) && strtolower($_GET['order']) === 'asc' ? 'ASC' : 'DESC';
