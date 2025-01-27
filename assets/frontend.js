@@ -5,6 +5,7 @@ jalaliDatepicker.startWatch({
     time: true,
 });  
 jQuery(document).ready(function ($) {
+    
     $(document).on('click','.sproductFormButtonPrev',function(){
         validateCurrentStep();
     });
@@ -16,6 +17,7 @@ jQuery(document).ready(function ($) {
         let jsonData = {};
         $('.sproduct-input').each(function () {
             let $input = $(this);
+            console.log($input);
             let name = $input.attr('name');
             let type = $input.data('input-type');
     
@@ -32,6 +34,7 @@ jQuery(document).ready(function ($) {
                     jsonData[name].push($input.val());
                 }
             } else if (type === 'file') {
+                console.log($input);
                 if ($input[0].files.length > 0) {
                     formData.append(name, $input[0].files[0]);
                 }

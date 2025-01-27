@@ -162,19 +162,62 @@ function sproduct_create_subscription_on_order($order_id) {
 add_action('wp_ajax_sproduct_submit_form', 'sproduct_submit_form');
 add_action('wp_ajax_nopriv_sproduct_submit_form', 'sproduct_submit_form');
 function sproduct_submit_form() {
-    check_ajax_referer('sproduct_form_nonce', 'nonce');
+    if (!check_ajax_referer('sproduct_form_nonce', 'nonce', false)) {
+        wp_send_json_error(['message' => 'Invalid nonce']);
+        return;
+    }
+
+
     $planName  = isset($_POST['planName']) ? sanitize_text_field($_POST['planName']) : '';
     $postID  = isset($_POST['postID']) ? sanitize_text_field($_POST['postID']) : '';
     $productName = get_the_title($postID);
     $planPrice  = isset($_POST['planPrice']) ? sanitize_text_field($_POST['planPrice']) : '';
     $planDuration  = isset($_POST['planDuration']) ? sanitize_text_field($_POST['planDuration']) : '';
     $requestType  = isset($_POST['requestType']) ? sanitize_text_field($_POST['requestType']) : '';
-    $submittedFormData  = isset($_POST['submittedFormData']) ? sanitize_text_field($_POST['submittedFormData']) : '';
-    $cart_item_key = add_custom_virtual_product_to_cart($productName , $planName, $planPrice , $planDuration , $requestType , $submittedFormData);
-    if($cart_item_key){
-        wp_send_json_success(['added'=>1]);
+    $submittedFormData  = isset($_POST['submittedFormData']) ? json_decode(stripslashes($_POST['submittedFormData']), true) : [];
+
+    error_log('Form data Before Update: ' . print_r($submittedFormData, true));
+
+    // Handle file upload
+    if (!empty($_FILES)) {
+        $uploaded_files = [];
+        foreach ($_FILES as $file_key => $file) {
+            if ($file['error'] === UPLOAD_ERR_OK) {
+                $uploaded_file = wp_handle_upload($file, ['test_form' => false]);
+                if (isset($uploaded_file['url'])) {
+                    $uploaded_files[$file_key] = $uploaded_file['url'];
+                } else {
+                    error_log('File upload failed: ' . print_r($uploaded_file, true));
+                }
+            } else {
+                error_log("File upload error for key $file_key: " . $file['error']);
+            }
+        }
+        error_log('Upload File Array is:'.print_r($uploaded_files , true));
+
+        foreach ($uploaded_files as $key => $url) {
+            $submittedFormData[$key] = $url;
+        }
+        error_log('Updated From is:'.print_r($submittedFormData , true));
     }
-    else{
-        wp_send_json_error(['added'=>0]);
+
+    error_log('Updated form data with files: ' . print_r($submittedFormData, true));
+
+    // Add product to cart
+    $cart_item_key = add_custom_virtual_product_to_cart(
+        $productName,
+        $planName,
+        $planPrice,
+        $planDuration,
+        $requestType,
+        json_encode($submittedFormData, JSON_UNESCAPED_UNICODE)
+    );
+
+    if ($cart_item_key) {
+        error_log('Product added to cart: ' . $cart_item_key);
+        wp_send_json_success(['added' => 1]);
+    } else {
+        error_log('Failed to add product to cart.');
+        wp_send_json_error(['added' => 0]);
     }
 }
