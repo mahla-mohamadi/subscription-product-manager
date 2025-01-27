@@ -294,85 +294,9 @@ function edit_subscription_page_callback(){
             ";
 
             $order_ids = $wpdb->get_col($wpdb->prepare($query, $meta_key, $meta_value));
-            // Query WooCommerce orders
-            // دریافت سفارش‌های کاربر
-            // $customer_orders = wc_get_orders(array(
-            //     'customer_id' => $user_id,
-            //     'limit' => -1, // بدون محدودیت
-            //     'orderby' => 'date',
-            //     'order' => 'DESC',
-            // ));
-
-            // if ($customer_orders) {
-            //     echo "<table border='1' style='width:100%; text-align: center;'>";
-            //     echo "<tr>
-            //             <th>سریال سفارش</th>
-            //             <th>نام محصول</th>
-            //             <th>مبلغ</th>
-            //             <th>تاریخ</th>
-            //         </tr>";
-            
-            //     $orders_found = false; // Track if any relevant orders are found
-            
-            //     foreach ($customer_orders as $order) {
-            //         $order_id = $order->get_id();
-            //         $order_date = $order->get_date_created();
-            //         $formatted_date = $order_date ? $order_date->date('Y-m-d') : '';
-
-            //         // Check if the order date is within the subscription period
-            //         // if ($formatted_date > $subscription_end_date || $formatted_date <= $subscription_start_date) {
-            //         //     continue; // Skip orders outside the subscription period
-            //         // }
-
-            //         $newDate = convert_to_jalali($formatted_date);
-            //         $contains_virtual_product = false; // Flag to check if the order contains a virtual product
-            
-            //         // First pass: Check if the order contains any virtual product
-            //         foreach ($order->get_items() as $item) {
-            //             $product_id = $item->get_product_id();
-            //             if (in_array($product_id, $hidden_virtual_product_ids)) {
-            //                 $contains_virtual_product = true;
-            //                 break; // Stop checking once a virtual product is found
-            //             }
-            //         }
-            
-            //         // If the order contains a virtual product, display all products in the order
-            //         if ($contains_virtual_product) {
-            //             foreach ($order->get_items() as $item) {
-            //                 $product_id = $item->get_product_id();
-            //                 $product_name = $item->get_name(); // Get product name
-            //                 $item_total = $item->get_total(); // Get item's total price
-            //                 $product_sku = get_post_meta($product_id, '_sku', true);
-            
-            //                 // Customize virtual product name if needed
-            //                 if (in_array($product_id, $hidden_virtual_product_ids)) {
-            //                     if ($product_sku === 's_prod_virtual') {
-            //                         $product_name = "اشتراک {$subscription->plan}";
-            //                     }
-            //                 }
-            
-            //                 // Mark as orders found and display the product
-            //                 $orders_found = true;
-            //                 echo "<tr>
-            //                         <td>{$order_id}</td>
-            //                         <td>{$product_name}</td>
-            //                         <td>{$item_total} تومان</td>
-            //                         <td>{$newDate}</td>
-            //                     </tr>";
-            //             }
-            //         }
-            //     }
-            
-            //     if (!$orders_found) {
-            //         echo "<tr><td colspan='4'>هیچ سفارشی با محصولات مجازی مورد نظر پیدا نشد.</td></tr>";
-            //     }
-            //     echo "</table>";
-            // } else {
-            //     echo "<p>این کاربر سفارشی ندارد.</p>";
-            // }
             if (!empty($order_ids)) {
                 echo '<table border="1" style="border-collapse: collapse; width: 100%;">';
-                echo '<tr><th>Order ID</th><th>Paid Amount</th><th>Date</th></tr>';
+                echo '<tr><th>سریال سفارش</th><th>مبلغ پرداخت شده</th><th>تاریخ و زمان</th></tr>';
             
                 foreach ($order_ids as $order_id) {
                     // Load the order object
@@ -401,37 +325,89 @@ function edit_subscription_page_callback(){
 
 
             // Add a form for editing if needed
+            // echo '<form method="post">';
+            // echo '<input type="hidden" name="edit_hidden_id" id="edit_hidden_id" value="'.esc_attr($subscription->id).'">';
+            // echo '<label for="edit_sub_plan">پلن:</label>';
+            // echo '<input type="text" id="edit_sub_name" name="edit_sub_name" value="' . esc_attr($subscription->name) . '">';
+            // echo '<br>';
+            // echo '<label for="status">وضعیت:</label>';
+            // echo '<input type="text" id="status" name="status" value="' . esc_attr($subscription->status) . '">';
+            // echo '<label for="status">وضعیت:</label>';
+            // echo '<select id="status" name="status">';
+            // $status_options = ['active' => 'فعال', 'deactive' => 'غیر فعال', 'pending' => 'در انتظار']; // Status options
+            // foreach ($status_options as $key => $label) {
+            //     $selected = ($key === esc_html($subscription->status)) ? 'selected' : '';
+            //     echo "<option value='" . esc_attr($key) . "' $selected>" . esc_html($label) . "</option>";
+            // }
+            // echo '</select>';
+            // echo '<br>';
+            // echo '<input type="submit" name="update_subscription" value="بروزرسانی">';
+            // echo '</form>';
+
+            // Add a form for editing if needed
             echo '<form method="post">';
-            echo '<input type="hidden" name="edit_hidden_id" id="edit_hidden_id" value="'.esc_attr($subscription->id).'">';
-            echo '<label for="edit_sub_plan">پلن:</label>';
-            echo '<input type="text" id="edit_sub_name" name="edit_sub_name" value="' . esc_attr($subscription->name) . '">';
-            echo '<br>';
+            echo '<input type="hidden" name="edit_hidden_id" id="edit_hidden_id" value="' . esc_attr($subscription->id) . '">';
             echo '<label for="status">وضعیت:</label>';
-            echo '<input type="text" id="status" name="status" value="' . esc_attr($subscription->status) . '">';
+            echo '<select id="status" name="status">';
+            $status_options = ['active' => 'فعال', 'deactive' => 'غیر فعال', 'pending' => 'در انتظار']; // Status options
+            foreach ($status_options as $key => $label) {
+                $selected = ($key === esc_html($subscription->status)) ? 'selected' : '';
+                echo "<option value='" . esc_attr($key) . "' $selected>" . esc_html($label) . "</option>";
+            }
+            echo '</select>';
             echo '<br>';
+            wp_nonce_field('edit_subscription_nonce');
             echo '<input type="submit" name="update_subscription" value="بروزرسانی">';
             echo '</form>';
+            
+
 
             // Handle form submission
-            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_subscription'])) {
-                $new_name = sanitize_text_field($_POST['name']);
-                $new_status = sanitize_text_field($_POST['status']);
+            // if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_subscription'])) {
+            //     $new_name = sanitize_text_field($_POST['name']);
+            //     // $new_status = sanitize_text_field($_POST['status']);
+            //     $new_status = in_array($_POST['status'], ['active', 'deactive', 'pending']) ? sanitize_text_field($_POST['status']) : $subscription->status; // Validate the status
 
+            //     $update_result = $wpdb->update(
+            //         $table_name,
+            //         [
+            //             'name' => $new_name,
+            //             'status' => $new_status
+            //         ],
+            //         ['id' => $subscription_id],
+            //         ['%s', '%s'], // Data format for the fields being updated
+            //         ['%d']        // Data format for the WHERE clause
+            //     );
+
+            //     if ($update_result !== false) {
+            //         echo '<p style="color:green;">اشتراک با موفقیت بروزرسانی شد.</p>';
+            //     } else {
+            //         echo '<p style="color:red;">خطایی در بروزرسانی رخ داد.</p>';
+            //     }
+            // }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_subscription'])) {
+                check_admin_referer('edit_subscription_nonce'); // Verify nonce
+                $new_name = sanitize_text_field($_POST['edit_sub_name']);
+                $new_status = in_array($_POST['status'], ['active', 'deactive', 'pending']) ? sanitize_text_field($_POST['status']) : $subscription->status;
+            
                 $update_result = $wpdb->update(
                     $table_name,
                     [
-                        'name' => $new_name,
                         'status' => $new_status
                     ],
                     ['id' => $subscription_id],
-                    ['%s', '%s'], // Data format for the fields being updated
-                    ['%d']        // Data format for the WHERE clause
-                );
-
+                    ['%s'], // Data format for the fields being updated
+                    ['%d']  // Data format for the WHERE clause
+                );  
+                if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'edit_subscription_nonce')) {
+                    echo '<p style="color:red;">خطای امنیتی: درخواست نامعتبر.</p>';
+                    return;
+                }
                 if ($update_result !== false) {
                     echo '<p style="color:green;">اشتراک با موفقیت بروزرسانی شد.</p>';
                 } else {
                     echo '<p style="color:red;">خطایی در بروزرسانی رخ داد.</p>';
+                    echo '<p>Database Error: ' . esc_html($wpdb->last_error) . '</p>';
                 }
             }
         } else {
