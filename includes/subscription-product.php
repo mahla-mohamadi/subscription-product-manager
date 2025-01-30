@@ -86,3 +86,24 @@ function woocommerce_save_meta_box_data($post_id)
         delete_post_meta($post_id, '_selected_sproduct_ids');
     }
 }
+
+function add_subscription_message_to_product_title() {
+    global $product;
+
+    if (!$product) return;
+
+    // Get the custom field value
+    $selected_sproduct_ids = get_post_meta($product->get_id(), '_selected_sproduct_ids', true);
+
+    // Check if it has a value
+    if (!empty($selected_sproduct_ids)) {
+        echo '<p>این محصول مخصوص اشتراک‌های زیر است</p>';
+        foreach($selected_sproduct_ids as $sid){
+            echo '<a href="'.get_the_permalink($sid).'">'.get_the_title($sid).'<a>';
+            echo '<br>';
+        }
+
+    }
+}
+add_action('woocommerce_single_product_summary', 'add_subscription_message_to_product_title', 6);
+

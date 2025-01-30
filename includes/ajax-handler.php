@@ -138,7 +138,7 @@ function sproduct_create_subscription_on_order($order_id) {
                 'plan'        => $pn,
                 'formdata'        => $form,
                 'amount'      => $price,
-                'status'      => 'active',
+                'status'      => 'pending',
             ),
             array('%d', '%s', '%d', '%s', '%s', '%s', '%s', '%d', '%s')
         );

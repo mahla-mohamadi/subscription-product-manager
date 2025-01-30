@@ -72,24 +72,60 @@ function sproduct_display_form_on_single($content)
     </div>
     <?php
         echo $post->ID;
-        $linkedProductArgs = ['post_type' => 'product', 'post_status' => 'publish','posts_per_page' => -1,'meta_query' => [['key' => '_selected_sproduct_ids','value' => 'i:' . $post->ID . ';','compare' => 'LIKE']]];
+        $linkedProductArgs = [
+            'post_type'      => 'product',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'meta_query'     => [
+                [
+                    'key'     => '_selected_sproduct_ids',
+                    'value'   => 'i:' . $post->ID . ';',
+                    'compare' => 'LIKE'
+                ]
+            ]
+        ];
+        
         $linkedProductQuery = new WP_Query($linkedProductArgs);
-        if ($linkedProductQuery->have_posts()){ ?>
+        if ($linkedProductQuery->have_posts()) { ?>
             <div class="sproductLinkedProductStep">
                 <h3>همراه با اشتراک سفارش دهید</h3>
                 <div class="sproductLinkedProductBody">
-                <?php while ($linkedProductQuery->have_posts()){ $linkedProductQuery->the_post(); ?>
-                    <label>
-                        <input type="checkbox" id="sproductLinkedProductCheckbox" class="sproductLinkedProductCheckbox" name="selected_products[]" value="<?php echo get_the_ID(); ?>">
-                        <img src="<?php the_post_thumbnail_url() ?>" />
-                        <?php the_title(); ?>
-                    </label>
-                <?php } ?>
+                    <?php while ($linkedProductQuery->have_posts()) { 
+                        $linkedProductQuery->the_post();
+                        $product = wc_get_product(get_the_ID());
+        
+                        // Check if the product is variable
+                        if ($product->is_type('variable')) {
+                            $variations = $product->get_available_variations();
+        
+                            foreach ($variations as $variation) {
+                                $variation_id = $variation['variation_id'];
+                                $variation_product = wc_get_product($variation_id);
+                                ?>
+                                <label>
+                                    <input type="checkbox" class="sproductLinkedProductCheckbox" name="selected_products[]" value="<?php echo $variation_id; ?>">
+                                    <img src="<?php echo wp_get_attachment_url($variation_product->get_image_id()); ?>" />
+                                    <?php echo $variation_product->get_name(); ?>
+                                </label>
+                                <?php
+                            }
+                        } else {
+                            ?>
+                            <label>
+                                <input type="checkbox" class="sproductLinkedProductCheckbox" name="selected_products[]" value="<?php echo get_the_ID(); ?>">
+                                <img src="<?php the_post_thumbnail_url(); ?>" />
+                                <?php the_title(); ?>
+                            </label>
+                            <?php
+                        }
+                    } ?>
                 </div>
             </div>
-        <?php } else{ ?>
+        <?php } else { ?>
             <p>هیچ محصولی با این اشتراک مرتبط نیست.</p>
-        <?php } ?>
+        <?php }
+        
+        wp_reset_postdata(); ?>        
     <?php wp_reset_postdata(); ?>
     <div class="sproductFormNavigator">
         <div class="sproductFormButton sproductFormButtonPrev"><span class="sproductFormButtonIcon"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><path fill="none" stroke="#3d3d3d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8.5 5 7 7-7 7"/></svg></span><span>مرحله قبل</span></div>

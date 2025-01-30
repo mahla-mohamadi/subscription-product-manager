@@ -162,7 +162,8 @@ function wallet_balance_endpoint_content() {
     echo '</div>';
     echo '<form class="walletTopUp" method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
     echo '<input type="hidden" name="action" value="top_up_wallet">';
-    echo '<input type="number" name="top_up_amount" min="1" placeholder="مبلغ اعتبار" required />';
+    echo '<p id="error-message" style="color: red;margin: 0;font-size: 11px;margin-right: auto;""></p>';
+    echo '<input type="text" id="topUpAmount" name="top_up_amount" placeholder="مبلغ اعتبار" required />';
     wp_nonce_field('top_up_wallet_nonce', 'top_up_wallet_nonce_field');
     echo '<button type="submit">' . __('افزایش شارژ کیف پول', 'woocommerce') . '</button>';
     echo '</form>';

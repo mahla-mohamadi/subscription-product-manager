@@ -1,27 +1,77 @@
 <?php
 
-
-
-
-// Schedule the cron job for midnight daily.
-function schedule_subscription_status_check() {
+// Schedule the cron jobs for subscription status and reminders.
+function schedule_subscription_cron_jobs() {
+    // Schedule the 'check_subscription_status' event if not already scheduled.
     if (!wp_next_scheduled('check_subscription_status')) {
-        // Schedule the event to run daily at midnight.
         wp_schedule_event(strtotime('00:00:00'), 'daily', 'check_subscription_status');
     }
-}
-add_action('wp', 'schedule_subscription_status_check');
 
-// Clear the cron event upon plugin/theme deactivation.
-function clear_subscription_status_check() {
-    $timestamp = wp_next_scheduled('check_subscription_status');
-    if ($timestamp) {
-        wp_unschedule_event($timestamp, 'check_subscription_status');
+    // Schedule the 'check_subscription_reminders' event if not already scheduled.
+    if (!wp_next_scheduled('check_subscription_reminders')) {
+        wp_schedule_event(strtotime('00:00:00'), 'daily', 'check_subscription_reminders');
     }
 }
-register_deactivation_hook(__FILE__, 'clear_subscription_status_check');
+add_action('wp', 'schedule_subscription_cron_jobs');
 
+// Clear the cron jobs upon plugin/theme deactivation.
+function clear_subscription_cron_jobs() {
+    // Clear the 'check_subscription_status' event if scheduled.
+    $status_timestamp = wp_next_scheduled('check_subscription_status');
+    if ($status_timestamp) {
+        wp_unschedule_event($status_timestamp, 'check_subscription_status');
+    }
 
+    // Clear the 'check_subscription_reminders' event if scheduled.
+    $reminder_timestamp = wp_next_scheduled('check_subscription_reminders');
+    if ($reminder_timestamp) {
+        wp_unschedule_event($reminder_timestamp, 'check_subscription_reminders');
+    }
+}
+register_deactivation_hook(__FILE__, 'clear_subscription_cron_jobs');
+
+// Function to handle subscription reminders.
+function check_subscription_reminders() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 's_subscriptions';
+    $today_date = current_time('Y-m-d'); // Outputs 'YYYY-MM-DD'.
+    $three_days = date('Y-m-d', strtotime('+3 days', strtotime($today_date)));
+    $two_days = date('Y-m-d', strtotime('+2 days', strtotime($today_date)));
+    $one_day = date('Y-m-d', strtotime('+1 day', strtotime($today_date)));
+    $subscriptions_three_days = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT id, end_date FROM $table_name WHERE end_date = %s AND status = %s",
+            $three_days,
+            'active'
+        )
+    );
+    $subscriptions_two_days = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT id, end_date FROM $table_name WHERE end_date = %s AND status = %s",
+            $two_days,
+            'active'
+        )
+    );
+    $subscriptions_one_day = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT id, end_date FROM $table_name WHERE end_date = %s AND status = %s",
+            $one_day,
+            'active'
+        )
+    );
+    foreach ($subscriptions_three_days as $subscription) {
+        error_log("Three days before the end of ID {$subscription->id} subscription.");
+    }
+
+    foreach ($subscriptions_two_days as $subscription) {
+        error_log("Two days left until the end of ID {$subscription->id} subscription.");
+    }
+
+    foreach ($subscriptions_one_day as $subscription) {
+        error_log("One day left until the end of ID {$subscription->id} subscription.");
+    }
+}
+add_action('check_subscription_reminders', 'check_subscription_reminders');
 
 
 function update_subscription_status() {
@@ -172,7 +222,10 @@ function subscriptions_page_callback(){
             echo '<td>' . esc_html($row->plan) . '</td>';
             if (esc_html($row->status) == "active") {
                 echo '<td class="activeButton"><span>فعال</span></td>';
-            } else {
+            } else if(esc_html($row->status) == "pending"){
+                echo '<td class="pendingButton"><span>در انتظار</span></td>';
+            }
+             else {
                 echo '<td class="DeactiveButton"><span>غیر فعال</span></td>';
             }
             echo '<td><a href="'.esc_url($editURL).'"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><g stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.28 6.4-9.54 9.54c-.95.95-3.77 1.39-4.4.76s-.2-3.45.75-4.4l9.55-9.55a2.58 2.58 0 1 1 3.64 3.65"/><path d="M11 4H6a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h11c2.21 0 3-1.8 3-4v-5"/></g></svg></a></td>';
@@ -235,7 +288,10 @@ function edit_subscription_page_callback(){
             $formData = json_decode(stripslashes($subscription->formdata),true);
             if (esc_html($subscription->status) == "active") {
                 $statusBadge = '<span style="background-color: #d2ffc9;padding: 3px 10px;border-radius: 2px;color: #384a34;border: 1px solid #bceeb2;">فعال</span>';
-            } else {
+            } else if(esc_html($subscription->status) == "pending") {
+                $statusBadge = '<span style="background-color: #fff7c9;padding: 3px 10px;border-radius: 2px;color: #4a3434;border: 1px solid #eedfb2;" class="DeactiveButton">در انتظار</span>';
+            }
+            else {
                 $statusBadge = '<span style="background-color: #ffc9c9;padding: 3px 10px;border-radius: 2px;color: #4a3434;border: 1px solid #eeb2b2;" class="DeactiveButton">غیر فعال</span>';
             }
             echo "<h1>ویرایش اشتراک</h1>";
@@ -410,7 +466,8 @@ function edit_subscription_page_callback(){
                     echo '<p>Database Error: ' . esc_html($wpdb->last_error) . '</p>';
                 }
             }
-        } else {
+        } 
+        else {
             echo "<h1>خطا</h1>";
             echo "<p>اشتراک با این ID یافت نشد.</p>";
         }

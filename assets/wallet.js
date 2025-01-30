@@ -25,4 +25,17 @@ jQuery(document).ready(function ($) {
     $(document.body).on('updated_checkout', function () {
         console.log('Checkout updated, ensuring event bindings remain active');
     });
+
+    $("#topUpAmount").on("input", function () {
+        var value = $(this).val();
+        
+        // Allow only numbers (remove letters and symbols)
+        if (!/^\d*$/.test(value)) {
+            $("#error-message").text("لطفا مبلغ را به عدد وارد کنید").show();
+            $(this).val(value.replace(/\D/g, "")); // Remove non-numeric characters
+        } else {
+            $("#error-message").hide();
+        }
+    });
+
 });
