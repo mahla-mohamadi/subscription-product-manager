@@ -277,16 +277,6 @@ main#primary {
 }
 
 .verticalSelected {}
-
-.sproductSingleInput .daySelector{
-    width: 50px;
-}
-.sproductSingleInput .monthSelector{
-    width: 50px;
-}
-.sproductSingleInput .yearSelector{
-    width: 100px;
-}
 .sproductStepBody{
     display: flex;
     flex-wrap: wrap;
@@ -299,6 +289,17 @@ main#primary {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    position: relative;
+}
+.sproductSingleInput .validateMessage{
+    position: absolute;
+    left: 0;
+    top: 20px;
+    font-size: 12px;
+    color: #d00;
+}
+.sproductSingleInputCheckbox .validateMessage , .sproductSingleInputRadio .validateMessage{
+    top: 10px;
 }
 .sproduct-input{
     width: 100%;
