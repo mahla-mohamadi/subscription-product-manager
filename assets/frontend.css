@@ -298,12 +298,23 @@ main#primary {
     font-size: 12px;
     color: #d00;
 }
+.sproductSingleInput .validateNumberMessage{
+    position: absolute;
+    right: 0;
+    font-size: 12px;
+    color: #d00;
+    bottom: -20px;
+}
+
 .sproductSingleInputCheckbox .validateMessage , .sproductSingleInputRadio .validateMessage{
     top: 10px;
 }
 .sproduct-input{
     width: 100%;
     padding: 10px !important;
+}
+.sproduct-input:focus{
+    outline: none;
 }
 textarea.sproduct-input{
     resize: none;

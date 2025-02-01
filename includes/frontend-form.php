@@ -15,7 +15,7 @@ function sproduct_display_form_on_single($content)
     $form_data = json_decode($form_data, true);
     $plans = get_post_meta($post->ID, '_sproduct_plans', true);
     $plans = maybe_unserialize($plans);  // Ensure proper decoding
-    $textInputs = ['text','email','number','nationalcode','postcode','datepicker'];
+    $textInputs = ['text','email','number','nationalcode','postcode','datepicker','phonenumber','phone'];
     ob_start();
     echo '<div class="sproductStepContainer" data-post-id="'.esc_attr($post->ID).'">';
     foreach($form_data as $step){

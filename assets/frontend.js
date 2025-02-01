@@ -4,7 +4,31 @@ jalaliDatepicker.startWatch({
     maxDate: "attr",
     time: true,
 });  
+
+
+
+
 jQuery(document).ready(function ($) {
+    function isJustNumbers(value) {
+        return /^\d*$/.test(value);
+    }
+    $('.sproduct-input[data-input-type="phone"], \
+       .sproduct-input[data-input-type="phonenumber"], \
+       .sproduct-input[data-input-type="postcode"], \
+       .sproduct-input[data-input-type="nationalcode"], \
+       .sproduct-input[data-input-type="number"]').on('input', function () {
+        // $(this).siblings('.validateMessage').remove();
+        let currentVal = $(this).val();
+        if (!isJustNumbers(currentVal)) {
+            $(this).val(currentVal.replace(/\D/g, ""));
+            if ($(this).siblings('.validateNumberMessage').length === 0) {
+                $(this).after('<span class="validateNumberMessage">فقط عدد وارد شود</span>');
+            }
+        } else {
+            $(this).siblings('.validateNumberMessage').remove();
+        }
+    });
+
     function isEmptyOrSpaces(value) {
         return value === null || value.match(/^ *$/) !== null;
     }
@@ -21,6 +45,30 @@ jQuery(document).ready(function ($) {
         }
         return true;
     }
+    function isTenDigits(value) {
+        if (value.length === 10) {
+            return true;
+        }
+        return false;
+    }
+    function isPhoneNumber(value) {
+        if (value.length === 11 && value.startsWith("09")) {
+            return true;
+        }
+        return false;
+    }
+    function isValidEmail(value) {
+        var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailPattern.test(value);
+    }
+    function isIranianLandline(phoneNumber) {
+        let regex = /^0[1|3|4|5|6|7|8|9][0-9]{9}$|^02[0-9]{9}$/;
+        return regex.test(phoneNumber);
+    }
+    function isValidDate(date) {
+        let dateRegex = /^\d{4}\/(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])$/;
+        return dateRegex.test(date);
+    }
     function validateStep(step){
         let allInputs = $('.sproductSingleStep').eq(step).find('.sproduct-input');
         $.each(allInputs,function(){
@@ -29,7 +77,7 @@ jQuery(document).ready(function ($) {
             let currentInput = $(this);
             let currentType = currentInput.attr('data-input-type');
             let currentVal = currentInput.val();
-            let currentIsRequired = currentInput.attr('data-input-required');
+            let currentIsRequired = (currentInput.attr('data-input-required')==1 ? true : false);
             let currentMinChar = currentInput.attr('data-input-minchar');
             let currentMaxChar = currentInput.attr('data-input-maxchar');
             let currentMinNum = currentInput.attr('data-input-minnum');
@@ -53,6 +101,29 @@ jQuery(document).ready(function ($) {
                 }
                 else if(currentType == 'number' && !isNumberBetween($(this).val(),currentMinNum,currentMaxNum)){
                     validateMessage = 'عدد وارد شده باید بین '+currentMinNum+' و '+currentMaxNum+' باشد';
+                    isValid = false;
+                }
+                else if (
+                    (currentType == 'postcode' || currentType == 'nationalcode') && !isTenDigits(currentVal)){ 
+                    validateMessage = 'باید ده رقم باشد';
+                    isValid = false;
+                }
+                else if 
+                    (currentType == 'phonenumber' && !isPhoneNumber(currentVal)){ 
+                    validateMessage = 'شماره موبایل صحیح نیست';
+                    isValid = false;
+                }
+                else if 
+                    (currentType == 'email' && !isValidEmail(currentVal)){ 
+                    validateMessage = 'ایمیل وارد شده صحیح نیست';
+                    isValid = false;
+                }
+                else if (currentType == 'phone' && !isIranianLandline(currentVal)) { 
+                    validateMessage = 'شماره تلفن ثابت معتبر نیست';
+                    isValid = false;
+                }
+                else if (currentType == 'datepicker' && !isValidDate(currentVal)) { 
+                    validateMessage = 'فرمت تاریخ صحیح نیست';
                     isValid = false;
                 }
             }
@@ -82,6 +153,12 @@ jQuery(document).ready(function ($) {
     });
     $(document).on('click','.sproductFormButtonNext',function(){
         console.log('changed');
+    });
+    $('.sproduct-input').on('input', function(){
+        if($(this).siblings('.validateMessage').length){
+            $(this).siblings('.validateMessage').remove();
+            $(this).css({'border-color':'rgb(204,204,204)'})
+        }
     });
     $(document).on('click', '.sproductFormButtonProceed', function () {
         validateStep(0);
@@ -214,3 +291,4 @@ jQuery(document).ready(function ($) {
     //     this.value = this.value.replace(/\D/g, '');
     // }); 
 });
+
