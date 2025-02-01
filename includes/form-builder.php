@@ -9,6 +9,14 @@ function sproduct_add_metabox() {
         'normal',
         'high'
     );
+    add_meta_box(
+        'sproduct_form_condition',
+        'نمایش شرطی',
+        'sproduct_form_condition_callback',
+        'sproduct',
+        'normal',
+        'high'
+    );
 }
 add_action('add_meta_boxes', 'sproduct_add_metabox');
 
@@ -37,6 +45,23 @@ function sproduct_form_builder_callback($post) {
 
     <?php
 }
+function sproduct_form_condition_callback($post){
+    wp_nonce_field('sproduct_save_condition', 'sproduct_condition_nonce');
+    $condition_data = get_post_meta($post->ID, '_sproduct_condition_data', true);
+    ?>
+    <h4>برای نمایش کامل فیلدها یک بار بروزرسانی کنید</h4>
+    <div class="conditionContainer">
+        <div class="conditionRow"></div>
+        <div class="button-primary add-condition" id="add-condition">افزودن شرط</div>
+    </div>
+    <textarea name="sproduct_condition_data" id="sproduct_condition_data" style="display:none;">
+        <?php echo esc_textarea($condition_data); ?>
+    </textarea>
+    <script>
+        window.sproductConditionData = <?php echo $condition_data ? $condition_data : '[]'; ?>;
+    </script>
+    <?php
+}
 
 // Enqueue Admin Scripts (Sortable.js and admin.js)
 function sproduct_enqueue_admin_scripts($hook) {
@@ -52,7 +77,22 @@ function sproduct_enqueue_admin_scripts($hook) {
                 null, 
                 true
             );
+            // Enqueue Select2 CSS
+            wp_enqueue_style(
+                'select2-css', 
+                SPRODUCT_URL . 'assets/select2.min.css', 
+                [], 
+                null
+            );
 
+            // Enqueue Select2 JavaScript
+            wp_enqueue_script(
+                'select2-js', 
+                SPRODUCT_URL . 'assets/select2.min.js', 
+                ['jquery'], 
+                null, 
+                true
+            );
             // Enqueue admin.js for form builder logic
             wp_enqueue_script(
                 'sproduct-admin-js', 
@@ -69,7 +109,7 @@ add_action('admin_enqueue_scripts', 'sproduct_enqueue_admin_scripts');
 // Save Form Data (Post Meta) on Save
 function sproduct_save_form($post_id) {
     // Verify nonce for security
-    if (!isset($_POST['sproduct_nonce']) || !wp_verify_nonce($_POST['sproduct_nonce'], 'sproduct_save_form')) {
+    if (!isset($_POST['sproduct_form_nonce']) || !wp_verify_nonce($_POST['sproduct_form_nonce'], 'sproduct_save_form') || !isset($_POST['sproduct_condition_nonce']) || !wp_verify_nonce($_POST['sproduct_condition_nonce'], 'sproduct_save_condition')) {
         return;
     }
 
@@ -87,6 +127,10 @@ function sproduct_save_form($post_id) {
     if (isset($_POST['sproduct_form_data'])) {
         $form_data = wp_unslash($_POST['sproduct_form_data']);  // Decode slashed data
         update_post_meta($post_id, '_sproduct_form_data', $form_data);
+    }
+    if (isset($_POST['sproduct_condition_data'])) {
+        $condition_data = wp_unslash($_POST['sproduct_condition_data']);  // Decode slashed data
+        update_post_meta($post_id, '_sproduct_condition_data', $condition_data);
     }
 }
 add_action('save_post', 'sproduct_save_form');

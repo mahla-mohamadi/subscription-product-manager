@@ -5,6 +5,27 @@ jalaliDatepicker.startWatch({
     time: true,
 });  
 jQuery(document).ready(function ($) {
+    let dynamicRules = JSON.parse($('#condition_data_input').val());
+    $.each(dynamicRules, function(index, rule) {
+        $('input[name="' + rule.showItem + '"]').closest('.sproductSingleInput').hide();
+        $('input[name="' + rule.ifItem + '"]').on('change', function() {
+          var inputType = $(this).attr('type');
+          if (inputType === 'checkbox') {
+            if ($(this).is(':checked') && $(this).val() === rule.equalItem) {
+              $('input[name="' + rule.showItem + '"]').closest('.sproductSingleInput').show();
+            } else {
+              $('input[name="' + rule.showItem + '"]').closest('.sproductSingleInput').hide();
+            }
+          } else if (inputType === 'radio') {
+            var selectedVal = $('input[name="' + rule.ifItem + '"]:checked').val();
+            if (selectedVal === rule.equalItem) {
+              $('input[name="' + rule.showItem + '"]').closest('.sproductSingleInput').show();
+            } else {
+              $('input[name="' + rule.showItem + '"]').closest('.sproductSingleInput').hide();
+            }
+          }
+        });
+    });
     function isEmptyOrSpaces(value) {
         return value === null || value.match(/^ *$/) !== null;
     }

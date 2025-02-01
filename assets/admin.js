@@ -1,5 +1,6 @@
 jQuery(document).ready(function ($) {
     const formContainer = $('.form-steps');
+    const conditionContainer = $('.conditionRow');
     function initializeSortable() {
         new Sortable($('.form-steps')[0], {
             animation: 150,
@@ -25,7 +26,6 @@ jQuery(document).ready(function ($) {
         });
     }
     function renderAdminForm(formData){
-        console.log(formData);
         formContainer.html('');
         let stepContainer = '';
         $.each(formData , function(stepIndex,step){
@@ -125,7 +125,11 @@ jQuery(document).ready(function ($) {
     let formData = window.sproductFormData && Array.isArray(window.sproductFormData)
         ? window.sproductFormData
         : [];
+    let conditionData = window.sproductConditionData && Array.isArray(window.sproductConditionData)
+        ? window.sproductConditionData
+        : [];
     renderAdminForm(formData);
+    renderConditions(conditionData);
     $('#add-step-btn').on('click', function () {
         updateFormData();
         const newStep = {name: 'مرحله',inputs: []};
@@ -172,7 +176,10 @@ jQuery(document).ready(function ($) {
     $('#publish').on('click', function (e) {
         e.preventDefault();
         updateFormData();
+        updateConditionData();
         $('#sproduct_form_data').val(JSON.stringify(formData));
+        $('#sproduct_condition_data').val(JSON.stringify(conditionData));
+        console.log($('#sproduct_condition_data').val());
         $(this).off('click');
         $(this).click();
     });
@@ -199,5 +206,74 @@ jQuery(document).ready(function ($) {
         let tempVal = $(this).val();
         $(this).val('');
         $(this).val(tempVal);
+    });
+    //////// Conditions
+    function renderConditions(){
+        console.log(conditionData);
+        let finalConditionHTML = '';
+        $.each(conditionData , function(conditionIndex,condition){
+            let conditionDataFields = '<span>نمایش</span><select id="inputDropDown" class="select2 inputDropDown"><option value="">انتخاب کنید</option>';
+            let conditionDataSelectFields = '<span>اگر</span><select id="inputSelectDropDown" class="select2 inputSelectDropDown"><option value="">انتخاب کنید</option>';
+            let conditionDataOptions = '<span>برابر شود با</span><select id="inputOptionDropDown" class="select2 inputOptionDropDown"><option value="">انتخاب کنید</option>';    
+            $.each(formData , function(stepIndex,step){
+                $.each(step['inputs'] , function(inputIndex,input){
+                    if(input['type']=='checkbox' || input['type']=='radio'){
+                        conditionDataSelectFields+='<option value="'+input['name']+'"'+(condition['ifItem']==input['name'] ? ' selected':'')+'>'+input['name']+'</option>';
+                        $.each(input['options'],function(optionIndex,option){
+                            conditionDataOptions+='<option value="'+option['name']+'" data-parent-field="'+input['name']+'"'+(condition['equalItem']==option['name'] ? ' selected':'')+'>'+option['name']+'</option>';
+                        });
+                    }
+                    else{
+                        conditionDataFields+='<option value="'+input['name']+'"'+(condition['showItem']==input['name'] ? ' selected':'')+'>'+input['name']+'</option>';
+                    }
+                });
+            });
+            conditionDataFields+='</select>';
+            conditionDataSelectFields+='</select>';
+            conditionDataOptions+='</select>';
+            finalConditionHTML += '<div class="conditionSingleRow">'+conditionDataFields+conditionDataSelectFields+conditionDataOptions+'</div>';
+        });
+        conditionContainer.html(finalConditionHTML);
+
+        $('.select2').select2();
+        $('.conditionSingleRow').each(function () {
+            var $optionDropdown = $(this).find('.inputOptionDropDown');
+            $optionDropdown.data('original-options', $optionDropdown.find('option').clone());
+        });
+        $('.inputSelectDropDown').on('change', function () {
+            var selectedValue = $(this).val();
+            var $row = $(this).closest('.conditionSingleRow');
+            var $optionDropdown = $row.find('.inputOptionDropDown');
+            var originalOptions = $optionDropdown.data('original-options');
+            var filteredOptions = originalOptions.filter(function () {
+                return $(this).attr('data-parent-field') === selectedValue;
+            });
+            $optionDropdown.select2('destroy');
+            $optionDropdown.empty().append(filteredOptions);
+            $optionDropdown.select2();
+        });
+        $('.inputSelectDropDown').trigger('change');
+
+    }
+    function updateConditionData(){
+        let conditionDataUpdate = [];
+        $.each($('.conditionSingleRow'),function(){
+            console.log($(this).find('.inputDropDown').val());
+            console.log($(this).find('.inputSelectDropDown').val());
+            console.log($(this).find('.inputOptionDropDown').val());
+            let conditionRow = {
+                showItem: $(this).find('.inputDropDown').val(),
+                ifItem: $(this).find('.inputSelectDropDown').val(),
+                equalItem: $(this).find('.inputOptionDropDown').val(),
+            }
+            conditionDataUpdate.push(conditionRow);
+        });
+        conditionData = conditionDataUpdate;
+    }
+    $('.add-condition').on('click', function () {
+        updateConditionData();
+        const newCondition = {showItem: '' , ifItem: '' ,equalItem: ''};
+        conditionData.push(newCondition);
+        renderConditions(conditionData);
     });
 });

@@ -8,6 +8,7 @@ function sproduct_display_form_on_single($content)
     if (is_singular('sproduct') && in_the_loop() && is_main_query()) {
         global $post;
         $form_data = get_post_meta($post->ID, '_sproduct_form_data', true);
+        $condition_data = get_post_meta($post->ID, '_sproduct_condition_data', true);
         if (!$form_data) {
             return $content . '<p>فرم اشتراک یافت نشد.</p>';
         }
@@ -18,6 +19,7 @@ function sproduct_display_form_on_single($content)
     $textInputs = ['text','email','number','nationalcode','postcode','datepicker'];
     ob_start();
     echo '<div class="sproductStepContainer" data-post-id="'.esc_attr($post->ID).'">';
+    echo '<textarea class="condition_data_input" id="condition_data_input" name="condition_data_input" style="display:none;">'.$condition_data.'</textarea>';
     foreach($form_data as $step){
         // echo '<pre>';
         // print_r($step);
